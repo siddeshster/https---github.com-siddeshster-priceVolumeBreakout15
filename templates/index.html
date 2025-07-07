@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Stock Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+
+
+  <style>
+    body {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      background-color: #0f111a;
+      color: #e0e0e0;
+    }
+
+    .theme-dark .table {
+      background-color: #121212;
+      color: #ffffff;
+    }
+
+    .form-label,
+    .form-control,
+    .form-select {
+      font-size: 12px;
+    }
+
+    .table td,
+    .table th {
+      vertical-align: middle !important;
+      text-align: center;
+      padding: 6px;
+    }
+
+    .text-bullish {
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    .text-bearish {
+      color: #ff4d4d;
+      font-weight: bold;
+    }
+
+
+    .table-bordered th,
+    .table-bordered td {
+      border-color: #333;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 3px 6px;
+    }
+
+    .form-check-label {
+      font-size: 11px;
+    }
+
+    .switch-container {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
+
+    .btn-primary {
+      background-color: #0066cc;
+      border-color: #005cbf;
+      font-size: 12px;
+    }
+
+    .btn-primary:hover {
+      background-color: #0052a3;
+      border-color: #004080;
+    }
+
+    .form-check-input:checked {
+      background-color: #00ff00;
+      border-color: #00ff00;
+    }
+
+    .table-success {
+      background-color: #003300 !important;
+    }
+
+    .table-danger {
+      background-color: #330000 !important;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: #1c1c1c;
+    }
+
+    .table-striped tbody tr:nth-of-type(even) {
+      background-color: #121212;
+    }
+
+    .table th {
+      background-color: #1a1a1a;
+      color: #ccc;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    .form-select,
+    .form-control {
+      background-color: #1c1c1c;
+      color: #fff;
+      border-color: #444;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+      border-color: #00ff00;
+      box-shadow: none;
+    }
+
+    .reversal-bullish {
+      background-color: #003322;
+      color: #33ff99;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .reversal-bearish {
+      background-color: #330000;
+      color: #ff6666;
+      font-weight: bold;
+      text-align: center;
+    }
+
+  </style>
+
+
+  <!-- <script>
+    // Auto refresh form every 10 seconds
+    setInterval(() => {
+      const form = document.querySelector("form");
+      if (form) form.submit();
+    }, 5000);
+  </script> -->
+</head>
+
+<body class="theme-dark" id="themeBody">
+  <div class="switch-container">
+    <div class="form-check form-switch text-white">
+      <input class="form-check-input" type="checkbox" id="themeSwitch" onchange="toggleTheme()">
+      <label class="form-check-label" for="themeSwitch">Light Mode</label>
+    </div>
+  </div>
+
+  <div class="container mt-4">
+    <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap">
+
+      <div class="col-auto">
+        <label class="form-label">Instrument</label>
+        <select name="instrument" class="form-select form-select-sm" required>
+          {% for name, token in instrument_map.items() %}
+          <option value="{{ name }}" {% if symbol==name %}selected{% endif %}>{{ name }} ({{ token }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-auto">
+        <label class="form-label">Date</label>
+        <input type="date" name="date" class="form-control form-control-sm" required value="{{ date or '' }}">
+      </div>
+
+      <div class="col-auto">
+        <label class="form-label">Previous Date</label>
+        <input type="date" name="prev_date" class="form-control form-control-sm" required value="{{ prev_date or '' }}">
+      </div>
+
+      <div class="col-auto">
+        <label class="form-label">Interval</label>
+        <select name="interval" class="form-select form-select-sm">
+          <option value="5minute" {% if interval=='5minute' %}selected{% endif %}>5 Min</option>
+          <option value="10minute" {% if interval=='10minute' %}selected{% endif %}>10 Min</option>
+          <option value="15minute" {% if interval=='15minute' %}selected{% endif %}>15 Min</option>
+          <option value="30minute" {% if interval=='30minute' %}selected{% endif %}>30 Min</option>
+          <option value="60minute" {% if interval=='60minute' %}selected{% endif %}>60 Min</option>
+        </select>
+      </div>
+
+      <div class="col-auto">
+        <label class="form-label">Volume Breakout %</label>
+        <input type="number" step="0.1" name="volume_breakout" class="form-control form-control-sm" required
+          value="{{ volume_threshold or 0 }}">
+      </div>
+
+      <div class="col-auto d-flex align-items-center pt-2">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="sortSwitch" name="sortSwitch"
+            onchange="this.form.submit()" {% if sort_order=='asc' %}checked{% endif %}>
+          <label class="form-check-label ms-1" for="sortSwitch">Oldest on Top</label>
+        </div>
+        <div class="form-check form-switch text-white">
+          <input class="form-check-input" type="checkbox" id="autoRefreshSwitch" onchange="toggleRefresh()" checked>
+          <label class="form-check-label" for="autoRefreshSwitch"> Auto Refresh</label>
+        </div>
+      </div>
+
+
+
+      <!-- ✅ Submit button aligned on same line -->
+      <div class="col-auto d-flex align-items-end">
+        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+      </div>
+
+    </form>
+
+
+    {% if no_data %}
+    <div class="alert alert-warning mt-3" role="alert">
+      ⚠️ No data available for selected date/token.
+    </div>
+    {% endif %}
+
+    {% if prev_stats %}
+    <div class="table-responsive mt-3">
+      <table class="table table-bordered table-dark text-center align-middle">
+        <thead>
+          <tr>
+            <th>Previous Date</th>
+            <th>15min High Close</th>
+            <th>15min Low Close</th>
+            <th>Prev High</th>
+            <th>Prev Low</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="fw-bold">{{ prev_stats.date }}</td>
+            <td class="text-success fw-bold">{{ prev_stats.highest_close }}</td>
+            <td class="text-danger fw-bold">{{ prev_stats.lowest_close }}</td>
+            <td class="text-success">{{ prev_stats.high }}</td>
+            <td class="text-danger">{{ prev_stats.low }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if data %}
+      <table class="table table-dark table-bordered mb-0">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Open</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Close</th>
+            <th>Volume</th>
+            <th>Volume Change %</th>
+            <th>Signal</th>
+            <th>Reversal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in data %}
+          <tr
+            class="{% if row.signal == 'BULLISH' %}table-success{% elif row.signal == 'BEARISH' %}table-danger{% endif %}">
+            <td>{{ row.date }}</td>
+            <td>{{ row.open }}</td>
+            <td>{{ row.high }}</td>
+            <td>{{ row.low }}</td>
+            <td>{{ row.close }}</td>
+            <td>{{ row.volume }}</td>
+            <td>{{ row['volume_change_%']|round(2) }}</td>
+            <td
+              class="{% if row.signal == 'BULLISH' %}text-bullish{% elif row.signal == 'BEARISH' %}text-bearish{% endif %}">
+              {{ row.signal }}
+            </td>
+            <td
+              class="{% if row.reversal == 'BULLISH REVERSAL' %}reversal-bullish{% elif row.reversal == 'BEARISH REVERSAL' %}reversal-bearish{% endif %}">
+              {{ row.reversal }}
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.getElementById('themeBody');
+      const isLight = body.classList.contains('theme-light');
+      if (isLight) {
+        body.classList.remove('theme-light');
+        body.classList.add('theme-dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        body.classList.remove('theme-dark');
+        body.classList.add('theme-light');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    window.onload = () => {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      const body = document.getElementById('themeBody');
+      const switchEl = document.getElementById('themeSwitch');
+      if (savedTheme === 'light') {
+        body.classList.remove('theme-dark');
+        body.classList.add('theme-light');
+        switchEl.checked = true;
+      } else {
+        body.classList.add('theme-dark');
+        switchEl.checked = false;
+      }
+    };
+  </script>
+
+  <!-- <script>
+    // Auto refresh form every 10 seconds
+    setInterval(() => {
+      const form = document.querySelector("form");
+      if (form) form.submit();
+    }, 5000);
+  </script> -->
+
+  <script>
+    let refreshTimer;
+
+    function startAutoRefresh() {
+      refreshTimer = setInterval(() => {
+        if (document.forms.length > 0) {
+          document.forms[0].submit();
+        }
+      }, 5000);
+    }
+
+    function stopAutoRefresh() {
+      clearInterval(refreshTimer);
+    }
+
+    function toggleRefresh() {
+      const isChecked = document.getElementById("autoRefreshSwitch").checked;
+      if (isChecked) {
+        startAutoRefresh();
+      } else {
+        stopAutoRefresh();
+      }
+    }
+
+    // Start by default if switch is checked
+    window.onload = () => {
+      if (document.getElementById("autoRefreshSwitch").checked) {
+        startAutoRefresh();
+      }
+    };
+  </script>
+
+
+
+</body>
+
+</html>
