@@ -151,5 +151,51 @@ def index():
                            date=today.strftime('%Y-%m-%d'),
                            prev_date=yesterday.strftime('%Y-%m-%d'))
 
+
+@app.route('/signals', methods=['GET', 'POST'])
+def signal_scan():
+    today = datetime.now().date()
+    yesterday = today - timedelta(days=1)
+    results = []
+
+    if request.method == 'POST':
+        date = request.form['date']
+        prev_date = request.form['prev_date']
+        interval = request.form['interval']
+        volume_threshold = float(request.form['volume_breakout'])
+        sort_order = 'desc'  # fixed for scanning
+
+        for symbol, token in instrument_map.items():
+            try:
+                prev_stats = get_previous_day_stats(token, prev_date)
+                if not prev_stats:
+                    continue
+
+                df = get_current_day_data(token, interval, prev_stats, volume_threshold, date, sort_order)
+
+                if not df.empty and (
+                    (df['signal'] != "").any() or (df['reversal'] != "").any()
+                ):
+                    result = {
+                        "symbol": symbol,
+                        "signals": df[df['signal'] != ""]['signal'].unique().tolist(),
+                        "reversals": df[df['reversal'] != ""]['reversal'].unique().tolist()
+                    }
+                    results.append(result)
+
+            except Exception as e:
+                print(f"Error with {symbol}: {e}")
+                continue
+
+        return render_template("signals.html", results=results,
+                               date=date, prev_date=prev_date,
+                               interval=interval, volume_threshold=volume_threshold)
+
+    return render_template("signals.html", results=[], 
+                           date=today.strftime('%Y-%m-%d'),
+                           prev_date=yesterday.strftime('%Y-%m-%d'),
+                           interval="5minute", volume_threshold=100)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
