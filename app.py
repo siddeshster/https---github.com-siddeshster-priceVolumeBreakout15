@@ -12,6 +12,19 @@ with open('config.json') as f:
 
 api_key = config['api_key']
 access_token = config['access_token']
+prev_day_interval= config['prev_day_interval']
+
+# // minute
+# // 3minute
+# // 5minute
+# // 10minute
+# // 15minute
+# // 30minute
+# // 60minute
+# // day
+# // week
+# // month
+
 
 kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
@@ -25,7 +38,7 @@ def get_previous_day_stats(token, prev_date_str):
     from_date = previous_day.replace(hour=9, minute=15)
     to_date = previous_day.replace(hour=15, minute=30)
 
-    candles = kite.historical_data(token, from_date, to_date, "15minute")
+    candles = kite.historical_data(token, from_date, to_date, prev_day_interval)
     if not candles:
         return {}
 
