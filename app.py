@@ -3,7 +3,7 @@ from kiteconnect import KiteConnect
 import json
 import pandas as pd
 from datetime import datetime, timedelta
-
+from time import sleep
 app = Flask(__name__)
 
 # Load config
@@ -30,8 +30,12 @@ kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
 
 # Load instrument list from CSV
-instruments_df = pd.read_csv("instruments.csv")
+instruments_df = pd.read_csv("instruments_short.csv")
 instrument_map = dict(zip(instruments_df['tradingsymbol'], instruments_df['instrument_token']))
+
+# instruments_df_2 = pd.read_csv("instruments_short.csv")
+# instrument_map_2 = dict(zip(instruments_df['tradingsymbol'], instruments_df['instrument_token']))
+
 
 def get_previous_day_stats(token, prev_date_str):
     previous_day = datetime.strptime(prev_date_str, "%Y-%m-%d")
@@ -151,7 +155,6 @@ def index():
                            date=today.strftime('%Y-%m-%d'),
                            prev_date=yesterday.strftime('%Y-%m-%d'))
 
-
 @app.route('/signals', methods=['GET', 'POST'])
 def signal_scan():
     today = datetime.now().date()
@@ -163,38 +166,51 @@ def signal_scan():
         prev_date = request.form['prev_date']
         interval = request.form['interval']
         volume_threshold = float(request.form['volume_breakout'])
-        sort_order = 'desc'  # fixed for scanning
+        filter_type = request.form.get('filter', 'all')
 
         for symbol, token in instrument_map.items():
             try:
+                sleep(0.35)
                 prev_stats = get_previous_day_stats(token, prev_date)
                 if not prev_stats:
                     continue
 
-                df = get_current_day_data(token, interval, prev_stats, volume_threshold, date, sort_order)
+                df = get_current_day_data(token, interval, prev_stats, volume_threshold, date, 'desc')
 
-                if not df.empty and (
-                    (df['signal'] != "").any() or (df['reversal'] != "").any()
-                ):
-                    result = {
-                        "symbol": symbol,
-                        "signals": df[df['signal'] != ""]['signal'].unique().tolist(),
-                        "reversals": df[df['reversal'] != ""]['reversal'].unique().tolist()
-                    }
-                    results.append(result)
+                signal_counts = df['signal'].value_counts()
+                reversal_counts = df['reversal'].value_counts()
+
+                # Only add rows where at least one signal or reversal is present
+                for signal in signal_counts.index:
+                    if signal:  # avoid empty string
+                        results.append({
+                            'symbol': symbol,
+                            'type': signal,
+                            'count': int(signal_counts[signal])
+                        })
+
+                for reversal in reversal_counts.index:
+                    if reversal:  # avoid empty string
+                        results.append({
+                            'symbol': symbol,
+                            'type': reversal,
+                            'count': int(reversal_counts[reversal])
+                        })
 
             except Exception as e:
-                print(f"Error with {symbol}: {e}")
+                print(f"Error scanning {symbol}: {e}")
                 continue
 
         return render_template("signals.html", results=results,
                                date=date, prev_date=prev_date,
-                               interval=interval, volume_threshold=volume_threshold)
+                               interval=interval, volume_threshold=volume_threshold,
+                               filter=filter_type)
 
-    return render_template("signals.html", results=[], 
+    return render_template("signals.html", results=[],
                            date=today.strftime('%Y-%m-%d'),
                            prev_date=yesterday.strftime('%Y-%m-%d'),
-                           interval="5minute", volume_threshold=100)
+                           interval='5minute', volume_threshold=100,
+                           filter='all')
 
 
 if __name__ == "__main__":

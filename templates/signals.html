@@ -1,78 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Signal Scanner</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background-color: #121212; color: #fff; font-family: monospace; }
-    table { font-size: 13px; }
-    .bullish { color: #00ff00; }
-    .bearish { color: #ff4d4d; }
-    .reversal { color: #66ccff; }
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: monospace;
+    }
+
+    table {
+      font-size: 13px;
+    }
+
+    .bullish {
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    .bearish {
+      color: #ff4d4d;
+      font-weight: bold;
+    }
+
+    .reversal {
+      color: #66ccff;
+      font-weight: bold;
+    }
   </style>
 </head>
+
 <body class="p-4">
-  <h4>🧠 Signal Scanner</h4>
-  <form method="POST" class="row g-3">
+  <h4>📊 Signal Scanner</h4>
+  <form method="POST" class="row g-2">
     <div class="col-auto">
       <label>Date</label>
       <input type="date" name="date" class="form-control" required value="{{ date }}">
     </div>
     <div class="col-auto">
-      <label>Previous Date</label>
+      <label>Prev Date</label>
       <input type="date" name="prev_date" class="form-control" required value="{{ prev_date }}">
     </div>
     <div class="col-auto">
       <label>Interval</label>
       <select name="interval" class="form-select">
-        <option value="5minute" {% if interval == '5minute' %}selected{% endif %}>5min</option>
-        <option value="15minute" {% if interval == '15minute' %}selected{% endif %}>15min</option>
-        <option value="30minute" {% if interval == '30minute' %}selected{% endif %}>30min</option>
+        <option value="5minute" {% if interval=='5minute' %}selected{% endif %}>5min</option>
+        <option value="15minute" {% if interval=='15minute' %}selected{% endif %}>15min</option>
+        <option value="30minute" {% if interval=='30minute' %}selected{% endif %}>30min</option>
       </select>
     </div>
     <div class="col-auto">
-      <label>Volume Breakout %</label>
+      <label>Filter</label>
+      <select name="filter" class="form-select">
+        <option value="all" {% if filter=='all' %}selected{% endif %}>All</option>
+        <option value="signal" {% if filter=='signal' %}selected{% endif %}>Only Signals</option>
+        <option value="reversal" {% if filter=='reversal' %}selected{% endif %}>Only Reversals</option>
+      </select>
+    </div>
+    <div class="col-auto">
+      <label>Breakout %</label>
       <input type="number" name="volume_breakout" class="form-control" step="0.1" value="{{ volume_threshold }}">
     </div>
     <div class="col-auto align-self-end">
-      <button type="submit" class="btn btn-success">Scan</button>
+      <button type="submit" class="btn btn-success">🔍 Scan</button>
     </div>
   </form>
 
   <hr class="bg-light">
 
   {% if results %}
-  <h6>{{ results|length }} Instruments Found with Signals</h6>
-  <div class="table-responsive mt-3">
-    <table class="table table-bordered table-dark table-striped text-center">
-      <thead>
-        <tr>
-          <th>Instrument</th>
-          <th>Signals</th>
-          <th>Reversals</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in results %}
-        <tr>
-          <td>{{ row.symbol }}</td>
-          <td>
-            {% for s in row.signals %}
-              <span class="bullish" {% if s == 'BULLISH' %}style="color:#00ff00"{% else %}style="color:#ff4d4d"{% endif %}>{{ s }}</span>
-              {% if not loop.last %}, {% endif %}
-            {% endfor %}
-          </td>
-          <td>
-            {% for r in row.reversals %}
-              <span class="reversal">{{ r }}</span>{% if not loop.last %}, {% endif %}
-            {% endfor %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% endif %}
+<div class="table-responsive mt-3">
+  <table class="table table-bordered table-dark text-center align-middle">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Type</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in results %}
+      <tr>
+        <td>{{ row.symbol }}</td>
+        <td class="{% if 'BULLISH' in row.type %}text-success{% elif 'BEARISH' in row.type %}text-danger{% endif %}">
+          {{ row.type }}
+        </td>
+        <td>{{ row.count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="alert alert-info mt-3">No signals detected. Try changing the filters.</div>
+{% endif %}
+
 </body>
+
 </html>
