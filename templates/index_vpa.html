@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Price Volume Signal Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+    }
+
+    .theme-dark {
+      background-color: #0f111a;
+      color: #e0e0e0;
+    }
+
+    .theme-dark .form-select,
+    .theme-dark .form-control {
+      background-color: #1a1a1a;
+      color: #ffffff;
+      border-color: #333;
+    }
+
+    .theme-dark .form-control:focus,
+    .theme-dark .form-select:focus {
+      border-color: #00ff00;
+      box-shadow: none;
+    }
+
+    .table th,
+    .table td {
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .table thead {
+      background-color: #1a1a1a;
+      color: #ccc;
+    }
+
+    .table-success {
+      background-color: #003300 !important;
+      color: #00ff00;
+    }
+
+    .table-danger {
+      background-color: #330000 !important;
+      color: #ff4d4d;
+    }
+
+    .text-bullish {
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    .text-bearish {
+      color: #ff4d4d;
+      font-weight: bold;
+    }
+
+    .switch-container {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
+
+    .form-check-label {
+      font-size: 12px;
+    }
+
+    .table-responsive {
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+
+    .btn-primary {
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body class="theme-dark" id="themeBody">
+
+<div class="switch-container">
+  <div class="form-check form-switch text-white">
+    <input class="form-check-input" type="checkbox" id="themeSwitch" onchange="toggleTheme()">
+    <label class="form-check-label" for="themeSwitch">Light Mode</label>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap">
+
+    <div class="col-auto">
+      <label class="form-label">Instrument</label>
+      <select name="instrument" class="form-select form-select-sm" required>
+        {% for name, token in instrument_map.items() %}
+        <option value="{{ name }}" {% if symbol==name %}selected{% endif %}>{{ name }} ({{ token }})</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <label class="form-label">Date</label>
+      <input type="date" name="date" class="form-control form-control-sm" required value="{{ date or '' }}">
+    </div>
+
+    <div class="col-auto">
+      <label class="form-label">Interval</label>
+      <select name="interval" class="form-select form-select-sm">
+        <option value="5minute" {% if interval=='5minute' %}selected{% endif %}>5 Min</option>
+        <option value="10minute" {% if interval=='10minute' %}selected{% endif %}>10 Min</option>
+        <option value="15minute" {% if interval=='15minute' %}selected{% endif %}>15 Min</option>
+        <option value="30minute" {% if interval=='30minute' %}selected{% endif %}>30 Min</option>
+        <option value="60minute" {% if interval=='60minute' %}selected{% endif %}>60 Min</option>
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <label class="form-label">Volume Breakout %</label>
+      <input type="number" step="0.1" name="volume_breakout" class="form-control form-control-sm"
+             required value="{{ volume_threshold or 0 }}">
+    </div>
+
+    <div class="col-auto d-flex align-items-center pt-2">
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="sortSwitch" name="sortSwitch"
+               onchange="this.form.submit()" {% if sort_order=='asc' %}checked{% endif %}>
+        <label class="form-check-label ms-1" for="sortSwitch">Oldest on Top</label>
+      </div>
+    </div>
+
+    <div class="col-auto d-flex align-items-center pt-2">
+      <div class="form-check form-switch text-white">
+        <input class="form-check-input" type="checkbox" id="autoRefreshSwitch" onchange="toggleRefresh()" checked>
+        <label class="form-check-label" for="autoRefreshSwitch"> Auto Refresh</label>
+      </div>
+    </div>
+
+    <div class="col-auto d-flex align-items-end">
+      <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+    </div>
+  </form>
+
+  {% if no_data %}
+  <div class="alert alert-warning mt-3" role="alert">
+    ⚠️ No data available for selected date/token.
+  </div>
+  {% endif %}
+
+  {% if data %}
+  <div class="table-responsive mt-4">
+    <table class="table table-dark table-bordered table-sm">
+      <thead>
+        <tr>
+          <th>Date</th><th>Open</th><th>High</th><th>Low</th><th>Close</th>
+          <th>Volume</th><th>Volume Change %</th><th>Signal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in data %}
+        <tr class="{% if row.signal == 'BULLISH' %}table-success{% elif row.signal == 'BEARISH' %}table-danger{% endif %}">
+          <td>{{ row.date }}</td>
+          <td>{{ row.open }}</td>
+          <td>{{ row.high }}</td>
+          <td>{{ row.low }}</td>
+          <td>{{ row.close }}</td>
+          <td>{{ row.volume }}</td>
+          <td>{{ row['volume_change_%']|round(2) }}</td>
+          <td class="{% if row.signal == 'BULLISH' %}text-bullish{% elif row.signal == 'BEARISH' %}text-bearish{% endif %}">
+            {{ row.signal }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  function toggleTheme() {
+    const body = document.getElementById("themeBody");
+    const isLight = body.classList.contains("theme-light");
+    if (isLight) {
+      body.classList.remove("theme-light");
+      body.classList.add("theme-dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      body.classList.remove("theme-dark");
+      body.classList.add("theme-light");
+      localStorage.setItem("theme", "light");
+    }
+  }
+
+  window.onload = () => {
+    const theme = localStorage.getItem("theme") || "dark";
+    const body = document.getElementById("themeBody");
+    const themeSwitch = document.getElementById("themeSwitch");
+    if (theme === "light") {
+      body.classList.remove("theme-dark");
+      body.classList.add("theme-light");
+      themeSwitch.checked = true;
+    }
+    if (document.getElementById("autoRefreshSwitch").checked) {
+      startAutoRefresh();
+    }
+  };
+
+  let refreshTimer;
+  function startAutoRefresh() {
+    refreshTimer = setInterval(() => {
+      document.forms[0].submit();
+    }, 10000);
+  }
+  function stopAutoRefresh() {
+    clearInterval(refreshTimer);
+  }
+  function toggleRefresh() {
+    if (document.getElementById("autoRefreshSwitch").checked) {
+      startAutoRefresh();
+    } else {
+      stopAutoRefresh();
+    }
+  }
+</script>
+
+</body>
+</html>

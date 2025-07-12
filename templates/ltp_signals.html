@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LTP Breakout Signals</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #0f111a;
+      color: #e0e0e0;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    .table th, .table td {
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .table thead {
+      background-color: #1a1a1a;
+      color: #ccc;
+    }
+
+    .bullish {
+      background-color: #002b00;
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    .bearish {
+      background-color: #2b0000;
+      color: #ff4d4d;
+      font-weight: bold;
+    }
+
+    .table-container {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+<div class="container mt-4">
+  <h4 class="mb-3">📊 LTP Signal Scanner</h4>
+
+  {% if results %}
+  <div class="table-container">
+    <table class="table table-bordered table-dark table-sm">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>LTP</th>
+          <th>Today High</th>
+          <th>Today Volume</th>
+          <th>Yest High</th>
+          <th>Yest Low</th>
+          <th>Yest Close</th>
+          <th>Yest Volume</th>
+          <th>30D Max High</th>
+          <th>30D Max Low</th>
+          <th>90D Max High</th>
+          <th>90D Max Low</th>
+          <th>Signal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in results %}
+        <tr class="{% if row.signal == 'BULLISH' %}bullish{% elif row.signal == 'BEARISH' %}bearish{% endif %}">
+          <td>{{ row.symbol }}</td>
+          <td>{{ row.ltp }}</td>
+          <td>{{ row.today_high }}</td>
+          <td>{{ row.today_volume }}</td>
+          <td>{{ row.y_high }}</td>
+          <td>{{ row.y_low }}</td>
+          <td>{{ row.y_close }}</td>
+          <td>{{ row.y_volume }}</td>
+          <td>{{ row['30_max_high'] }}</td>
+          <td>{{ row['30_max_low'] }}</td>
+          <td>{{ row['90_max_high'] }}</td>
+          <td>{{ row['90_max_low'] }}</td>
+          <td>{{ row.signal }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="alert alert-warning mt-3">No breakout signals found today.</div>
+  {% endif %}
+</div>
+</body>
+</html>

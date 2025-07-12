@@ -17,7 +17,7 @@ kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
 
 # Load instrument list from CSV
-instruments_df = pd.read_csv("instruments.csv")
+instruments_df = pd.read_csv("instruments_nfo.csv")
 instrument_map = dict(zip(instruments_df['tradingsymbol'], instruments_df['instrument_token']))
 
 def get_previous_day_stats(token, prev_date_str):
@@ -106,6 +106,95 @@ def index():
                            sort_order='desc',
                            date=today.strftime('%Y-%m-%d'),
                            prev_date=yesterday.strftime('%Y-%m-%d'))
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
 
+@app.route('/ltp-signals')
+def ltp_signals():
+    from_date_today = datetime.now().replace(hour=9, minute=15)
+    to_date_today = datetime.now().replace(hour=15, minute=30)
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    yesterday = datetime.now() - timedelta(days=1)
+    prev_date_str = yesterday.strftime('%Y-%m-%d')
+
+    result = []
+
+    for _, row in instruments_df.iterrows():
+        symbol = row['tradingsymbol']
+        token = int(row['instrument_token'])
+
+        try:
+            # Today 5-minute data
+            today_data = kite.historical_data(token, from_date_today, to_date_today, "5minute")
+            if not today_data:
+                continue
+            today_df = pd.DataFrame(today_data)
+            today_df['date'] = pd.to_datetime(today_df['date'])
+            ltp = today_df.iloc[-1]['close']
+            high = today_df['high'].max()
+            volume = today_df['volume'].sum()
+
+            # Yesterday data
+            y_from = yesterday.replace(hour=9, minute=15)
+            y_to = yesterday.replace(hour=15, minute=30)
+            y_data = kite.historical_data(token, y_from, y_to, "day")
+            if not y_data:
+                continue
+            y_df = pd.DataFrame(y_data)
+            y_close = y_df.iloc[-1]['close']
+            y_high = y_df['high'].max()
+            y_low = y_df['low'].min()
+            y_volume = y_df['volume'].sum()
+
+            # Last 30 days
+            from_30 = datetime.now() - timedelta(days=30)
+            data_30 = kite.historical_data(token, from_30, datetime.now(), "day")
+            df_30 = pd.DataFrame(data_30)
+            max_high_30 = df_30['high'].max()
+            max_low_30 = df_30['low'].min()
+            high_30 = df_30['high'].iloc[-1]
+            low_30 = df_30['low'].iloc[-1]
+
+            # Last 90 days
+            from_90 = datetime.now() - timedelta(days=90)
+            data_90 = kite.historical_data(token, from_90, datetime.now(), "day")
+            df_90 = pd.DataFrame(data_90)
+            max_high_90 = df_90['high'].max()
+            max_low_90 = df_90['low'].min()
+            high_90 = df_90['high'].iloc[-1]
+            low_90 = df_90['low'].iloc[-1]
+
+            # Signal Logic
+            signal = ""
+            if ltp > max_high_30 and ltp > max_high_90 and volume > y_volume:
+                signal = "BULLISH"
+            elif ltp < max_low_30 and ltp < max_low_90 and volume > y_volume:
+                signal = "BEARISH"
+
+            result.append({
+                'symbol': symbol,
+                'ltp': ltp,
+                'high': high,
+                'volume': volume,
+                'yest_high': y_high,
+                'yest_low': y_low,
+                'yest_close': y_close,
+                'yest_volume': y_volume,
+                'low_30': low_30,
+                'high_30': high_30,
+                'max_high_30': max_high_30,
+                'max_low_30': max_low_30,
+                'low_90': low_90,
+                'high_90': high_90,
+                'max_high_90': max_high_90,
+                'max_low_90': max_low_90,
+                'signal': signal
+            })
+
+        except Exception as e:
+            print(f"Error processing {symbol}: {e}")
+            continue
+
+    return render_template("ltp_signals.html", data=result)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

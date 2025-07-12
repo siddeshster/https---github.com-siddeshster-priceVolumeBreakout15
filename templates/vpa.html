@@ -147,66 +147,31 @@
   </div>
 
   <div class="container mt-4">
-    <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap">
-
-      <div class="col-auto">
-        <label class="form-label">Instrument</label>
-        <select name="instrument" class="form-select form-select-sm" required>
-          {% for name, token in instrument_map.items() %}
-          <option value="{{ name }}" {% if symbol==name %}selected{% endif %}>{{ name }} ({{ token }})</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="col-auto">
-        <label class="form-label">Date</label>
-        <input type="date" name="date" class="form-control form-control-sm" required value="{{ date or '' }}">
-      </div>
-
-      <div class="col-auto">
-        <label class="form-label">Previous Date</label>
-        <input type="date" name="prev_date" class="form-control form-control-sm" required value="{{ prev_date or '' }}">
-      </div>
-
-      <div class="col-auto">
-        <label class="form-label">Interval</label>
-        <select name="interval" class="form-select form-select-sm">
-          <option value="minute" {% if interval=='minute' %}selected{% endif %}>1 Min</option>
-          <option value="3minute" {% if interval=='3minute' %}selected{% endif %}>3 Min</option>
-          <option value="5minute" {% if interval=='5minute' %}selected{% endif %}>5 Min</option>
-          <option value="10minute" {% if interval=='10minute' %}selected{% endif %}>10 Min</option>
-          <option value="15minute" {% if interval=='15minute' %}selected{% endif %}>15 Min</option>
-          <option value="30minute" {% if interval=='30minute' %}selected{% endif %}>30 Min</option>
-          <option value="60minute" {% if interval=='60minute' %}selected{% endif %}>60 Min</option>
-        </select>
-      </div>
-
-      <div class="col-auto">
-        <label class="form-label">Volume Breakout %</label>
-        <input type="number" step="0.1" name="volume_breakout" class="form-control form-control-sm" required
-          value="{{ volume_threshold or 0 }}">
-      </div>
-
-      <div class="col-auto d-flex align-items-center pt-2">
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="sortSwitch" name="sortSwitch"
-            onchange="this.form.submit()" {% if sort_order=='asc' %}checked{% endif %}>
-          <label class="form-check-label ms-1" for="sortSwitch">Oldest on Top</label>
-        </div>
-        <div class="form-check form-switch text-white">
-          <input class="form-check-input" type="checkbox" id="autoRefreshSwitch" onchange="toggleRefresh()" checked>
-          <label class="form-check-label" for="autoRefreshSwitch"> Auto Refresh</label>
-        </div>
-      </div>
-
-
-
-      <!-- ✅ Submit button aligned on same line -->
-      <div class="col-auto d-flex align-items-end">
-        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
-      </div>
-
-    </form>
+    <form method="POST" class="row g-3">
+  <div class="col-md-3">
+    <label>Instrument</label>
+    <select name="instrument" class="form-select">
+      {% for inst in instruments %}
+        <option value="{{ inst }}">{{ inst }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label>Volume Breakout %</label>
+    <input type="number" step="0.1" name="volume_breakout" value="{{ selected_volume }}" class="form-control">
+  </div>
+  <div class="col-md-2">
+    <label>From Date</label>
+    <input type="date" name="from_date" value="{{ from_date }}" class="form-control">
+  </div>
+  <div class="col-md-2">
+    <label>To Date</label>
+    <input type="date" name="to_date" value="{{ to_date }}" class="form-control">
+  </div>
+  <div class="col-md-2 align-self-end">
+    <button type="submit" class="btn btn-primary w-100">Scan</button>
+  </div>
+</form>
 
 
     {% if no_data %}

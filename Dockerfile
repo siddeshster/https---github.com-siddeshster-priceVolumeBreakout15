@@ -1,21 +1,22 @@
-# Use a lightweight Python base image
-FROM python:3.11-slim
+# Use official Python image
+FROM python:3.10-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Set environment vars
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Set working directory
+# Set work directory
 WORKDIR /app
 
-# Copy project files
-COPY . .
-
 # Install dependencies
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy app code
+COPY . .
 
 # Expose port
 EXPOSE 5000
 
-# Start the app
-CMD ["python", "app.py"]
+# Run app
+CMD ["python", "app_vpa.py"]
