@@ -1,0 +1,14 @@
+{
+  "admin": {
+    "password": "admin@123"
+  },
+  "demo": {
+    "password": "demo@1234"
+  },
+    "vinita": {
+    "password": "vini@123"
+  },
+    "vedant": {
+    "password": "vedant@123"
+  }
+}
