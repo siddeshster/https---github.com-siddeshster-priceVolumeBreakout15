@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import hashlib
 from flask import session
 from datetime import timedelta
+import sqlite3
 
 app = Flask(__name__)
 app.secret_key = 'Paswd#1234'
@@ -25,6 +26,7 @@ kite.set_access_token(access_token)
 # Load instrument list from CSV
 instruments_df = pd.read_csv("InstrumentsData/instruments_short.csv")
 instrument_map = dict(zip(instruments_df['tradingsymbol'], instruments_df['instrument_token']))
+
 
 def get_current_day_data(token, interval, threshold, date_str, sort_order):
     day = datetime.strptime(date_str, "%Y-%m-%d")
@@ -55,9 +57,7 @@ def get_current_day_data(token, interval, threshold, date_str, sort_order):
         elif close < prev_close and vol_change > threshold and vol_m1 < 0 and vol_m2 < 0:
             df.loc[i, 'signal'] = "BEARISH"
 
-
-
-#SIGNAL 2
+    # SIGNAL 2
     df['signal2'] = ""
     df['volume_change_%'] = df['volume'].pct_change() * 100
     for i in range(2, len(df)):
@@ -68,29 +68,102 @@ def get_current_day_data(token, interval, threshold, date_str, sort_order):
         prev_vol_1 = df.loc[i - 1, 'volume_change_%']
         prev_vol_2 = df.loc[i - 2, 'volume_change_%']
 
-
         if (
-            close > max(prev_close_1, prev_close_2)
-            and vol_change > threshold
-            and prev_vol_1 < vol_change
-            and prev_vol_2 < vol_change
+                close > max(prev_close_1, prev_close_2)
+                and vol_change > threshold
+                and prev_vol_1 < vol_change
+                and prev_vol_2 < vol_change
         ):
             df.loc[i, 'signal2'] = "BULLISH"
 
         elif (
-            close < min(prev_close_1, prev_close_2)
-            and vol_change > threshold
-            and prev_vol_1 < vol_change
-            and prev_vol_2 < vol_change
+                close < min(prev_close_1, prev_close_2)
+                and vol_change > threshold
+                and prev_vol_1 < vol_change
+                and prev_vol_2 < vol_change
         ):
-            df.loc[i, 'signal2'] = "BEARISH" 
-
+            df.loc[i, 'signal2'] = "BEARISH"
 
     df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d %H:%M:%S')
     df = df.sort_values(by='date', ascending=(sort_order == 'asc'))
 
     print(df[['date', 'close', 'volume', 'signal', 'signal2']].tail(10))  # ✅ Debug
     return df
+
+
+instruments_df2 = pd.read_csv("InstrumentsData/instruments_short.csv")
+symbol_token_map2 = dict(zip(instruments_df2['tradingsymbol'], instruments_df['instrument_token']))
+
+
+def process_signal_for_instrument(symbol: str):
+    try:
+        instrument_token = symbol_token_map2.get(symbol)
+        if not instrument_token:
+            print(f"Instrument token not found for {symbol}")
+            return None
+
+        # Get historical data (last 3 candles of 10-min interval)
+        to_date = datetime.now()
+        # from_date = to_date - timedelta(days=1)  # 1 day back to ensure full coverage
+        from_date = to_date  # 1 day back to ensure full coverage
+
+        candles = kite.historical_data(
+            instrument_token=instrument_token,
+            from_date=from_date,
+            to_date=to_date,
+            interval="10minute",
+            continuous=False
+        )
+
+        if len(candles) < 3:
+            print(f"Not enough candles for {symbol}")
+            return None
+
+        df = pd.DataFrame(candles)
+        df.columns = ['date', 'open', 'high', 'low', 'close', 'volume']
+
+        # Use last 3 candles
+        last = df.iloc[-1]
+        prev1 = df.iloc[-2]
+        prev2 = df.iloc[-3]
+
+        # Volume delta %
+        volume_delta = ((last['volume'] - prev1['volume']) / prev1['volume']) * 100 if prev1['volume'] != 0 else 0
+        volume_threshold = 50  # 50% threshold, can be passed as a parameter
+
+        signal = None
+        if (
+                last['close'] > max(prev1['close'], prev2['close']) and
+                volume_delta > volume_threshold and
+                prev1['volume'] < last['volume'] and prev2['volume'] < last['volume']
+        ):
+            signal = 'BULLISH'
+
+        elif (
+                last['close'] < min(prev1['close'], prev2['close']) and
+                volume_delta > volume_threshold and
+                prev1['volume'] < last['volume'] and prev2['volume'] < last['volume']
+        ):
+            signal = 'BEARISH'
+
+        if signal:
+            return {
+                'symbol': symbol,
+                'signal': signal,
+                'signal_time': pd.to_datetime(last['date']).strftime("%Y-%m-%d %H:%M:%S"),
+                'open': last['open'],
+                'high': last['high'],
+                'low': last['low'],
+                'close': last['close'],
+                'volume': last['volume'],
+                'volume_delta': round(volume_delta, 2)
+            }
+
+        return None
+
+    except Exception as e:
+        print(f"Error processing {symbol}: {str(e)}")
+        return None
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -160,5 +233,17 @@ def logout():
 def extend_session():
     session.permanent = True
 
+
+@app.route("/signals")
+def view_signals():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT symbol, signal_type, signal_time, ltp, volume FROM signals ORDER BY signal_time DESC LIMIT 100")
+    signals = cursor.fetchall()
+    conn.close()
+    return render_template("signals.html", signals=signals)
+
+
 if __name__ == "__main__":
-        app.run(debug=True)
+    app.run(debug=True)
