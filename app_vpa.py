@@ -13,7 +13,7 @@ app.secret_key = 'Paswd#1234'
 app.permanent_session_lifetime = timedelta(days=1)
 
 # Load config
-with open('config.json') as f:
+with open('Config/config.json') as f:
     config = json.load(f)
 
 api_key = config['api_key']
@@ -23,7 +23,7 @@ kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
 
 # Load instrument list from CSV
-instruments_df = pd.read_csv("instruments_short.csv")
+instruments_df = pd.read_csv("InstrumentsData/instruments_short.csv")
 instrument_map = dict(zip(instruments_df['tradingsymbol'], instruments_df['instrument_token']))
 
 def get_current_day_data(token, interval, threshold, date_str, sort_order):
@@ -131,7 +131,7 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    with open('users.json') as f:
+    with open('Config/users.json') as f:
         users = json.load(f)
 
     error = None
