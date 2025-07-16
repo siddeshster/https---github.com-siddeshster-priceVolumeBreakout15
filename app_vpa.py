@@ -105,7 +105,7 @@ def process_signal_for_instrument(symbol: str):
         # Get historical data (last 3 candles of 10-min interval)
         to_date = datetime.now()
         # from_date = to_date - timedelta(days=1)  # 1 day back to ensure full coverage
-        from_date = to_date  # 1 day back to ensure full coverage
+        from_date = to_date - 1 # 1 day back to ensure full coverage
 
         candles = kite.historical_data(
             instrument_token=instrument_token,

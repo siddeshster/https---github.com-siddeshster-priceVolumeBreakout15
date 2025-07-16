@@ -60,7 +60,7 @@ def run_signal_job():
             print(f"[ERROR] {str(e)}")
 
         print("[INFO] Sleeping for 2 minutes...\n")
-        time.sleep(120)
+        time.sleep(60)
 
 
 if __name__ == "__main__":
