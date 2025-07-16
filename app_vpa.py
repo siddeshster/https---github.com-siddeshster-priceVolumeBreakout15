@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request
 from kiteconnect import KiteConnect
 import json
@@ -8,10 +9,16 @@ import hashlib
 from flask import session
 from datetime import timedelta
 import sqlite3
+from signal_worker import send_telegram_alert
+from datetime import datetime, timedelta
+import pandas as pd
+from flask import jsonify, request
+
 
 app = Flask(__name__)
 app.secret_key = 'Paswd#1234'
 app.permanent_session_lifetime = timedelta(days=1)
+
 
 # Load config
 with open('Config/config.json') as f:
@@ -26,7 +33,6 @@ kite.set_access_token(access_token)
 # Load instrument list from CSV
 instruments_df = pd.read_csv("InstrumentsData/instruments_short.csv")
 instrument_map = dict(zip(instruments_df['tradingsymbol'], instruments_df['instrument_token']))
-
 
 def get_current_day_data(token, interval, threshold, date_str, sort_order):
     day = datetime.strptime(date_str, "%Y-%m-%d")
@@ -87,83 +93,8 @@ def get_current_day_data(token, interval, threshold, date_str, sort_order):
     df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d %H:%M:%S')
     df = df.sort_values(by='date', ascending=(sort_order == 'asc'))
 
-    print(df[['date', 'close', 'volume', 'signal', 'signal2']].tail(10))  # ✅ Debug
+    # print(df[['date', 'close', 'volume', 'signal', 'signal2']].tail(10))  
     return df
-
-
-instruments_df2 = pd.read_csv("InstrumentsData/instruments_short.csv")
-symbol_token_map2 = dict(zip(instruments_df2['tradingsymbol'], instruments_df['instrument_token']))
-
-
-def process_signal_for_instrument(symbol: str):
-    try:
-        instrument_token = symbol_token_map2.get(symbol)
-        if not instrument_token:
-            print(f"Instrument token not found for {symbol}")
-            return None
-
-        # Get historical data (last 3 candles of 10-min interval)
-        to_date = datetime.now()
-        # from_date = to_date - timedelta(days=1)  # 1 day back to ensure full coverage
-        from_date = to_date - 1 # 1 day back to ensure full coverage
-
-        candles = kite.historical_data(
-            instrument_token=instrument_token,
-            from_date=from_date,
-            to_date=to_date,
-            interval="10minute",
-            continuous=False
-        )
-
-        if len(candles) < 3:
-            print(f"Not enough candles for {symbol}")
-            return None
-
-        df = pd.DataFrame(candles)
-        df.columns = ['date', 'open', 'high', 'low', 'close', 'volume']
-
-        # Use last 3 candles
-        last = df.iloc[-1]
-        prev1 = df.iloc[-2]
-        prev2 = df.iloc[-3]
-
-        # Volume delta %
-        volume_delta = ((last['volume'] - prev1['volume']) / prev1['volume']) * 100 if prev1['volume'] != 0 else 0
-        volume_threshold = 50  # 50% threshold, can be passed as a parameter
-
-        signal = None
-        if (
-                last['close'] > max(prev1['close'], prev2['close']) and
-                volume_delta > volume_threshold and
-                prev1['volume'] < last['volume'] and prev2['volume'] < last['volume']
-        ):
-            signal = 'BULLISH'
-
-        elif (
-                last['close'] < min(prev1['close'], prev2['close']) and
-                volume_delta > volume_threshold and
-                prev1['volume'] < last['volume'] and prev2['volume'] < last['volume']
-        ):
-            signal = 'BEARISH'
-
-        if signal:
-            return {
-                'symbol': symbol,
-                'signal': signal,
-                'signal_time': pd.to_datetime(last['date']).strftime("%Y-%m-%d %H:%M:%S"),
-                'open': last['open'],
-                'high': last['high'],
-                'low': last['low'],
-                'close': last['close'],
-                'volume': last['volume'],
-                'volume_delta': round(volume_delta, 2)
-            }
-
-        return None
-
-    except Exception as e:
-        print(f"Error processing {symbol}: {str(e)}")
-        return None
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -236,13 +167,83 @@ def extend_session():
 
 @app.route("/signals")
 def view_signals():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect('signals.db')
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT symbol, signal_type, signal_time, ltp, volume FROM signals ORDER BY signal_time DESC LIMIT 100")
-    signals = cursor.fetchall()
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("""
+        SELECT * FROM signals
+        WHERE DATE(signal_time) = ?
+        ORDER BY signal_time DESC
+    """, (today,))
+    rows = cursor.fetchall()
     conn.close()
-    return render_template("signals.html", signals=signals)
+
+    return render_template("signals.html", signals=rows)
+
+
+
+@app.route("/signals_nse_stock_fno")
+def view_signals():
+    conn = sqlite3.connect('signals.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("""
+        SELECT * FROM signals_nse_stocks_fno
+        WHERE DATE(signal_time) = ?
+        ORDER BY signal_time DESC
+    """, (today,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    return render_template("signals_nse_stock_fno.html", signals=rows)
+
+
+@app.route("/signals_nse_stock")
+def view_signals():
+    conn = sqlite3.connect('signals.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("""
+        SELECT * FROM signals_nse_stocks
+        WHERE DATE(signal_time) = ?
+        ORDER BY signal_time DESC
+    """, (today,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    return render_template("signals_nse_stock.html", signals=rows)
+
+@app.route("/signals/table")
+def signal_table_partial():
+    conn = sqlite3.connect('signals.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("""
+        SELECT * FROM signals
+        WHERE DATE(signal_time) = ?
+        ORDER BY signal_time DESC
+    """, (today,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    return render_template("partials/signal_rows.html", signals=rows)
+
+
+@app.route("/test-telegram", methods=["POST"])
+def test_telegram():
+    from signal_worker import send_telegram_alert
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    send_telegram_alert("TESTSYM", "BULLISH", 123.45, now_str)
+    return jsonify({"message": "✅ Test Telegram Alert Sent"})
+
 
 
 if __name__ == "__main__":

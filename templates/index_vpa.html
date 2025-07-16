@@ -123,7 +123,6 @@
     <form action="/logout" method="POST" style="margin-bottom: 10px;">
       <button class="btn btn-sm btn-warning" type="submit">🚪 Logout</button>
     </form>
-
     <div class="form-check form-switch text-white">
       <input class="form-check-input" type="checkbox" id="themeSwitch" onchange="toggleTheme()">
       <label class="form-check-label" for="themeSwitch">Light Mode</label>
@@ -180,9 +179,16 @@
       </div>
 
       <div class="col-auto d-flex align-items-end">
-        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+        <button type="submit" class="btn btn-sm btn-primary">Submit </button>
+      </div>
+
+      <div class="col-auto d-flex align-items-end">
+        <a href="/signals" class="btn btn-sm btn-primary">Signals Dashboard </a>
+        <button id="testTelegramBtn" class="btn btn-sm btn-primary">🚀 Send Test Telegram Alert</button>
+        <div id="telegramStatus" class="text-success mt-2"></div>
       </div>
     </form>
+
 
     {% if no_data %}
     <div class="alert alert-warning mt-3" role="alert">
@@ -289,7 +295,30 @@
     if (isChecked) startAutoRefresh();
   });
   </script>
+<script>
+document.getElementById('testTelegramBtn').addEventListener('click', () => {
+    const statusDiv = document.getElementById('telegramStatus');
+    statusDiv.innerText = '⏳ Sending alert...';
 
+    fetch('/test-telegram', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Network error");
+        return response.json();
+    })
+    .then(data => {
+        statusDiv.innerText = data.message;
+    })
+    .catch(err => {
+        console.error('Telegram error:', err);
+        statusDiv.innerText = '❌ Failed to send alert.';
+    });
+});
+</script>
 </body>
 
 </html>

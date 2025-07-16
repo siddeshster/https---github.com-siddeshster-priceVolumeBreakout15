@@ -1,0 +1,17 @@
+{% for row in signals %}
+<tr>
+    <td>{{ row.symbol }}</td>
+    <td>
+        <strong style="color: {{ 'lime' if row.signal_type == 'BULLISH' else 'red' }}">
+            {{ row.signal_type }}
+        </strong>
+    </td>
+    <td>{{ row.signal_time[:16] }}</td>
+    <td>{{ "%.2f"|format(row.open) }}</td>
+    <td>{{ "%.2f"|format(row.high) }}</td>
+    <td>{{ "%.2f"|format(row.low) }}</td>
+    <td>{{ "%.2f"|format(row.close) }}</td>
+    <td>{{ "%.0f"|format(row.volume) }}</td>
+    <td>{{ "%.2f"|format(row.volume_delta) }}%</td>
+</tr>
+{% endfor %}

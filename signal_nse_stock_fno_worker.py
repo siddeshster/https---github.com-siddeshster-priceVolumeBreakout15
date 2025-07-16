@@ -60,7 +60,7 @@ def store_signal_in_db(result):
 
         # Ensure table exists
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS signals (
+            CREATE TABLE IF NOT EXISTS signals_nse_stock_fno (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 symbol TEXT,
                 signal_type TEXT,
@@ -76,14 +76,14 @@ def store_signal_in_db(result):
 
         # Check for duplicates
         cursor.execute(
-            "SELECT COUNT(*) FROM signals WHERE symbol = ? AND signal_time = ?",
+            "SELECT COUNT(*) FROM signals_nse_stock_fno WHERE symbol = ? AND signal_time = ?",
             (result['symbol'], result['signal_time'])
         )
         exists = cursor.fetchone()[0]
 
         if exists == 0:
             cursor.execute('''
-                INSERT INTO signals (
+                INSERT INTO signals_nse_stock_fno (
                     symbol, signal_type, signal_time,
                     open, high, low, close,
                     volume, volume_delta
@@ -129,7 +129,7 @@ def background_signal_job():
         print("❌ No instruments found. Exiting.")
         return
 
-    print("🚀 Running signal worker in 3-minute test mode...")
+    print("🚀 Running signal worker in 10-minute test mode...")
 
     while True:
         now = datetime.now()
@@ -153,7 +153,7 @@ def background_signal_job():
                         instrument_token=instrument_token,
                         from_date=from_date,
                         to_date=to_date,
-                        interval="30minute",  # ⏱ test mode
+                        interval="10minute",  # ⏱ test mode
                         continuous=False
                     )
 
