@@ -8,6 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import hashlib
 from flask import session
 from datetime import timedelta
+from datetime import datetime
 import sqlite3
 from workers.signal_worker import send_telegram_alert
 from workers.signal_nse_stock_fno_worker import send_telegram_alert
@@ -126,7 +127,7 @@ def login_required(role=None):
     return wrapper
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/vpa_analysis', methods=['GET', 'POST'])
 @login_required()
 def index():
     if 'username' not in session:  # ✅ match the session key used at login
@@ -179,10 +180,11 @@ def login():
             if user:
                 status, validfrom, validto = user
                 today = datetime.today().date()
-                if status == 'ACTIVE' and validfrom <= str(today) <= validto:
+                # if status == 'ACTIVE' and validfrom <= str(today) <= validto:
+                if status == 'ACTIVE':
                     session['username'] = username
                     session['roles'] = get_user_roles(username)
-                    return redirect(url_for('index'))
+                    return redirect(url_for('dashboard'))
 
                 else:
                     flash("⚠️ User access expired or inactive.", "danger")
@@ -191,13 +193,36 @@ def login():
         else:
             flash("❌ Invalid credentials", "danger")
 
-    return render_template("login.html")
+    return render_template("login.html",datetime=datetime)
+
+@app.route('/dashboard')
+def dashboard():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    username = session['username']
+    conn = sqlite3.connect('signals.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM USERS_ROLES WHERE username = ?", (username,))
+    row = cursor.fetchone()
+    conn.close()
+
+    user_roles = {
+        'nse_stock': row['NSE_STOCK'] == 'Y',
+        'nse_fno': row['NSE_FNO'] == 'Y',
+        'mcx_fno': row['MCX_FNO'] == 'Y',
+    }
+
+    return render_template('landing.html', username=username, roles=user_roles,datetime=datetime)
+
 
 @app.route('/logout')
 def logout():
     session.clear()
     flash("🔓 Logged out successfully", "info")
     return redirect(url_for("login"))
+
 
 
 @app.before_request
@@ -317,6 +342,7 @@ def test_telegram():
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     send_telegram_alert("TESTSYM", "BULLISH", 123.45, now_str)
     return jsonify({"message": "✅ Test Telegram Alert Sent"})
+
 
 
 
