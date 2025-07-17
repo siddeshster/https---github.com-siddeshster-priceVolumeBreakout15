@@ -163,31 +163,6 @@ def index():
                            date=today.strftime('%Y-%m-%d'))
 
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     with open('Config/users.json') as f:
-#         users = json.load(f)
-
-#     error = None
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-
-#         # Validate credentials from users.json
-#         if username in users and users[username]['password'] == password:
-#             session.permanent = True  # 🔐 Keep session alive until logout
-#             session['username'] = username
-#             return redirect(url_for('index'))
-#         else:
-#             error = "Invalid credentials"
-
-#     return render_template("login.html", error=error)
-
-
-# @app.route('/logout', methods=['POST'])
-# def logout():
-#     session.clear()
-#     return redirect(url_for('login'))  # or index/homepage
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -347,3 +322,32 @@ def test_telegram():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
+
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     with open('Config/users.json') as f:
+#         users = json.load(f)
+
+#     error = None
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+
+#         # Validate credentials from users.json
+#         if username in users and users[username]['password'] == password:
+#             session.permanent = True  # 🔐 Keep session alive until logout
+#             session['username'] = username
+#             return redirect(url_for('index'))
+#         else:
+#             error = "Invalid credentials"
+
+#     return render_template("login.html", error=error)
+
+
+# @app.route('/logout', methods=['POST'])
+# def logout():
+#     session.clear()
+#     return redirect(url_for('login'))  # or index/homepage

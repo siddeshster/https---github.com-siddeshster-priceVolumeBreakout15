@@ -1,35 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Login - VPA Signal System</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body { background-color: #121212; color: #fff; }
-    .form-control, .btn { border-radius: 0.5rem; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Login | VPATradingSystem</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 60px auto;
+            padding: 30px;
+            background-color: #161b22;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 255, 128, 0.2);
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo-container img {
+            width: 180px;
+        }
+
+        .form-label {
+            color: #c9d1d9;
+        }
+
+        .form-control {
+            background-color: #0d1117;
+            border-color: #30363d;
+            color: #fff;
+        }
+
+        .btn-login {
+            background-color: #238636;
+            color: white;
+            border: none;
+        }
+
+        .btn-login:hover {
+            background-color: #2ea043;
+        }
+
+        .text-error {
+            color: #f85149;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container mt-5" style="max-width: 400px;">
-    <h3 class="text-center mb-4">🔐 Login</h3>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for category, msg in messages %}
-        <div class="alert alert-{{ category }}">{{ msg }}</div>
-      {% endfor %}
-    {% endwith %}
-
-    <form method="POST" action="{{ url_for('login') }}">
-      <div class="mb-3">
-        <label class="form-label">Username</label>
-        <input type="text" class="form-control" name="username" required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Password</label>
-        <input type="password" class="form-control" name="password" required>
-      </div>
-      <button type="submit" class="btn btn-primary w-100">Login</button>
-    </form>
-  </div>
+    <div class="login-container">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='/images/image_backgrd.png') }}" alt="VPATradingSystem Logo">
+        </div>
+        <h4 class="text-center mb-3">Login to VPATradingSystem</h4>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required autofocus>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            {% if error %}
+                <div class="text-error mb-2">{{ error }}</div>
+            {% endif %}
+            <div class="d-grid">
+                <button type="submit" class="btn btn-login">Login</button>
+            </div>
+        </form>
+    </div>
 </body>
 </html>
