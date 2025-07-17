@@ -17,7 +17,7 @@ kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
 
 DB_PATH = 'signals.db'
-CSV_PATH = 'InstrumentsData/instruments_mcx.csv'
+CSV_PATH = "InstrumentsData/instruments_eq_nse_2.csv"
 
 def load_symbol_token_map():
     symbol_token_map = {}
@@ -60,7 +60,7 @@ def store_signal_in_db(result):
 
         # Ensure table exists
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS signals (
+            CREATE TABLE IF NOT EXISTS signals_nse_stocks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 symbol TEXT,
                 signal_type TEXT,
@@ -76,14 +76,14 @@ def store_signal_in_db(result):
 
         # Check for duplicates
         cursor.execute(
-            "SELECT COUNT(*) FROM signals WHERE symbol = ? AND signal_time = ?",
+            "SELECT COUNT(*) FROM signals_nse_stocks WHERE symbol = ? AND signal_time = ?",
             (result['symbol'], result['signal_time'])
         )
         exists = cursor.fetchone()[0]
 
         if exists == 0:
             cursor.execute('''
-                INSERT INTO signals (
+                INSERT INTO signals_nse_stocks (
                     symbol, signal_type, signal_time,
                     open, high, low, close,
                     volume, volume_delta

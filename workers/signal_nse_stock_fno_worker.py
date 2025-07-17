@@ -17,7 +17,7 @@ kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
 
 DB_PATH = 'signals.db'
-CSV_PATH = 'InstrumentsData/instruments_mcx.csv'
+CSV_PATH = 'InstrumentsData/instruments_nfo_nse.csv'
 
 def load_symbol_token_map():
     symbol_token_map = {}

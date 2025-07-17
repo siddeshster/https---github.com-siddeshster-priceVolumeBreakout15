@@ -9,7 +9,10 @@ import hashlib
 from flask import session
 from datetime import timedelta
 import sqlite3
-from signal_worker import send_telegram_alert
+from workers.signal_worker import send_telegram_alert
+from workers.signal_nse_stock_fno_worker import send_telegram_alert
+from workers.signal_nse_stock_worker import send_telegram_alert
+from workers.signal_worker import send_telegram_alert
 from datetime import datetime, timedelta
 import pandas as pd
 from flask import jsonify, request
@@ -182,17 +185,32 @@ def view_signals():
 
     return render_template("signals.html", signals=rows)
 
-
-
-@app.route("/signals_nse_stock_fno")
-def view_signals():
+@app.route("/signals/table")
+def signal_table_partial_mcx():
     conn = sqlite3.connect('signals.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
     today = datetime.now().strftime("%Y-%m-%d")
     cursor.execute("""
-        SELECT * FROM signals_nse_stocks_fno
+        SELECT * FROM signals
+        WHERE DATE(signal_time) = ?
+        ORDER BY signal_time DESC
+    """, (today,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    return render_template("partials/signal_rows.html", signals=rows)
+# ---------------------------------------------------------------------------
+@app.route("/signals_nse_stock_fno")
+def view_signals_nse_stock_fno():
+    conn = sqlite3.connect('signals.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("""
+        SELECT * FROM signals_nse_stock_fno
         WHERE DATE(signal_time) = ?
         ORDER BY signal_time DESC
     """, (today,))
@@ -202,8 +220,25 @@ def view_signals():
     return render_template("signals_nse_stock_fno.html", signals=rows)
 
 
+@app.route("/signals_nse_stock_fno/table")
+def signal_table_partial_nse_stock_fno():
+    conn = sqlite3.connect('signals.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("""
+        SELECT * FROM signals_nse_stock_fno
+        WHERE DATE(signal_time) = ?
+        ORDER BY signal_time DESC
+    """, (today,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    return render_template("partials/signal_rows_nse_fno.html", signals=rows)
+# ---------------------------------------------------------------------------
 @app.route("/signals_nse_stock")
-def view_signals():
+def view_signals_nse_stock():
     conn = sqlite3.connect('signals.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -219,27 +254,30 @@ def view_signals():
 
     return render_template("signals_nse_stock.html", signals=rows)
 
-@app.route("/signals/table")
-def signal_table_partial():
+
+@app.route("/signals_nse_stock/table")
+def signal_table_partial_nse_stock():
     conn = sqlite3.connect('signals.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
     today = datetime.now().strftime("%Y-%m-%d")
     cursor.execute("""
-        SELECT * FROM signals
+        SELECT * FROM signals_nse_stocks
         WHERE DATE(signal_time) = ?
         ORDER BY signal_time DESC
     """, (today,))
     rows = cursor.fetchall()
     conn.close()
 
-    return render_template("partials/signal_rows.html", signals=rows)
+    return render_template("partials/signal_rows_nse_stocks.html", signals=rows)
+
+# ---------------------------------------------------------------------------
 
 
 @app.route("/test-telegram", methods=["POST"])
 def test_telegram():
-    from signal_worker import send_telegram_alert
+
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     send_telegram_alert("TESTSYM", "BULLISH", 123.45, now_str)
     return jsonify({"message": "✅ Test Telegram Alert Sent"})
