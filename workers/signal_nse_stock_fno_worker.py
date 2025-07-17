@@ -118,8 +118,8 @@ def store_signal_in_db(result):
 
 
 def is_market_time(now):
-    start = now.replace(hour=9, minute=0, second=0, microsecond=0)
-    end = now.replace(hour=23, minute=30, second=0, microsecond=0)
+    start = now.replace(hour=9, minute=15, second=0, microsecond=0)
+    end = now.replace(hour=3, minute=0, second=0, microsecond=0)
     return start <= now <= end
 
 
@@ -145,7 +145,7 @@ def background_signal_job():
                     print("📎 Available symbols in map:", list(symbol_token_map2.keys())[:5])
                     continue
 
-                from_date = now.replace(hour=9, minute=30, second=0, microsecond=0)
+                from_date = now.replace(hour=9, minute=25, second=0, microsecond=0)
                 to_date = now
 
                 try:
