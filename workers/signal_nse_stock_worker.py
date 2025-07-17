@@ -12,6 +12,7 @@ with open('Config/config.json') as f:
 
 api_key = config['api_key']
 access_token = config['access_token']
+interval =config
 
 kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)

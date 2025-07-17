@@ -16,6 +16,14 @@ from workers.signal_worker import send_telegram_alert
 from datetime import datetime, timedelta
 import pandas as pd
 from flask import jsonify, request
+from flask import Flask, render_template, request, redirect, session, url_for, flash
+from auth_utils import verify_user, get_user_roles
+from datetime import datetime
+import sqlite3
+from functools import wraps
+
+
+
 
 
 app = Flask(__name__)
@@ -99,8 +107,27 @@ def get_current_day_data(token, interval, threshold, date_str, sort_order):
     # print(df[['date', 'close', 'volume', 'signal', 'signal2']].tail(10))  
     return df
 
+def login_required(role=None):
+    def wrapper(func):
+        @wraps(func)
+        def secure_view(*args, **kwargs):
+            if 'username' not in session:
+                flash("🔒 Please login to access this page", "warning")
+                return redirect(url_for('login'))
+
+            if role:
+                roles = session.get('roles', {})
+                if roles.get(role) != 'Y':
+                    flash(f"🚫 Access denied: Missing permission '{role}'", "danger")
+                    return redirect(url_for('index'))
+
+            return func(*args, **kwargs)
+        return secure_view
+    return wrapper
+
 
 @app.route('/', methods=['GET', 'POST'])
+@login_required()
 def index():
     if 'username' not in session:  # ✅ match the session key used at login
         return redirect(url_for('login'))
@@ -136,39 +163,74 @@ def index():
                            date=today.strftime('%Y-%m-%d'))
 
 
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     with open('Config/users.json') as f:
+#         users = json.load(f)
+
+#     error = None
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+
+#         # Validate credentials from users.json
+#         if username in users and users[username]['password'] == password:
+#             session.permanent = True  # 🔐 Keep session alive until logout
+#             session['username'] = username
+#             return redirect(url_for('index'))
+#         else:
+#             error = "Invalid credentials"
+
+#     return render_template("login.html", error=error)
+
+
+# @app.route('/logout', methods=['POST'])
+# def logout():
+#     session.clear()
+#     return redirect(url_for('login'))  # or index/homepage
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    with open('Config/users.json') as f:
-        users = json.load(f)
-
-    error = None
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
 
-        # Validate credentials from users.json
-        if username in users and users[username]['password'] == password:
-            session.permanent = True  # 🔐 Keep session alive until logout
-            session['username'] = username
-            return redirect(url_for('index'))
+        if verify_user(username, password):
+            conn = sqlite3.connect('signals.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT status, validfrom, validto FROM USERS WHERE username = ?", (username,))
+            user = cursor.fetchone()
+            conn.close()
+
+            if user:
+                status, validfrom, validto = user
+                today = datetime.today().date()
+                if status == 'ACTIVE' and validfrom <= str(today) <= validto:
+                    session['username'] = username
+                    session['roles'] = get_user_roles(username)
+                    return redirect(url_for('index'))
+
+                else:
+                    flash("⚠️ User access expired or inactive.", "danger")
+            else:
+                flash("❌ User not found.", "danger")
         else:
-            error = "Invalid credentials"
+            flash("❌ Invalid credentials", "danger")
 
-    return render_template("login.html", error=error)
+    return render_template("login.html")
 
-
-@app.route('/logout', methods=['POST'])
+@app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login'))  # or index/homepage
+    flash("🔓 Logged out successfully", "info")
+    return redirect(url_for("login"))
 
 
 @app.before_request
 def extend_session():
     session.permanent = True
 
-
 @app.route("/signals")
+@login_required("MCX_FNO")
 def view_signals():
     conn = sqlite3.connect('signals.db')
     conn.row_factory = sqlite3.Row
@@ -203,6 +265,7 @@ def signal_table_partial_mcx():
     return render_template("partials/signal_rows.html", signals=rows)
 # ---------------------------------------------------------------------------
 @app.route("/signals_nse_stock_fno")
+@login_required("NSE_FNO")
 def view_signals_nse_stock_fno():
     conn = sqlite3.connect('signals.db')
     conn.row_factory = sqlite3.Row
@@ -218,7 +281,6 @@ def view_signals_nse_stock_fno():
     conn.close()
 
     return render_template("signals_nse_stock_fno.html", signals=rows)
-
 
 @app.route("/signals_nse_stock_fno/table")
 def signal_table_partial_nse_stock_fno():
@@ -238,6 +300,7 @@ def signal_table_partial_nse_stock_fno():
     return render_template("partials/signal_rows_nse_fno.html", signals=rows)
 # ---------------------------------------------------------------------------
 @app.route("/signals_nse_stock")
+@login_required("NSE_STOCK")
 def view_signals_nse_stock():
     conn = sqlite3.connect('signals.db')
     conn.row_factory = sqlite3.Row
@@ -253,7 +316,6 @@ def view_signals_nse_stock():
     conn.close()
 
     return render_template("signals_nse_stock.html", signals=rows)
-
 
 @app.route("/signals_nse_stock/table")
 def signal_table_partial_nse_stock():
@@ -273,7 +335,6 @@ def signal_table_partial_nse_stock():
     return render_template("partials/signal_rows_nse_stocks.html", signals=rows)
 
 # ---------------------------------------------------------------------------
-
 
 @app.route("/test-telegram", methods=["POST"])
 def test_telegram():

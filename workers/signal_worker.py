@@ -16,6 +16,11 @@ access_token = config['access_token']
 kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
 
+with open('Config/instrument_config.json') as f:
+    config = json.load(f)
+mcx_interval = config['mcx_fno']['interval']
+mcx_volume_threshold = config['mcx_fno']['volume_threshold']
+
 DB_PATH = 'signals.db'
 CSV_PATH = 'InstrumentsData/instruments_mcx.csv'
 
@@ -151,7 +156,7 @@ def background_signal_job():
                         instrument_token=instrument_token,
                         from_date=from_date,
                         to_date=to_date,
-                        interval="30minute",  # ⏱ test mode
+                        interval=mcx_interval,  # ⏱ test mode######################################################
                         continuous=False
                     )
 
@@ -169,7 +174,7 @@ def background_signal_job():
                         current = df.iloc[i]
 
                         volume_delta = ((current['volume'] - prev1['volume']) / prev1['volume']) * 100 if prev1['volume'] != 0 else 0
-                        volume_threshold = 100  # 🔍 sensitive for test
+                        volume_threshold = mcx_volume_threshold  # 🔍 sensitive for test######################################################
 
                         signal = None
                         if current['close'] > max(prev1['close'], prev2['close']) and volume_delta > volume_threshold:

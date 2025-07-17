@@ -118,10 +118,53 @@
 
 <body class="theme-dark" id="themeBody">
 
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg px-3">
+    <div class="container-fluid">
+      <div class="d-flex gap-2">
+        <a href="/signals" class="btn btn-primary btn-sm">MCX Signals Dashboard</a>
+        <a href="/signals_nse_stock_fno" class="btn btn-primary btn-sm">NSE FNO Signals Dashboard</a>
+        <a href="/signals_nse_stock" class="btn btn-primary btn-sm">NSE Stocks Signals Dashboard</a>
+      </div>
+
+      <div class="d-flex ms-auto align-items-center gap-3">
+        <!-- Dropdown for options -->
+        <div class="dropdown">
+          <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            ⚙️ Options
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li class="px-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="lightModeToggle">
+                <label class="form-check-label" for="lightModeToggle">Light Mode</label>
+              </div>
+            </li>
+            <li class="px-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
+                <label class="form-check-label" for="autoRefreshToggle">Auto Refresh</label>
+              </div>
+            </li>
+            <li class="px-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="oldestTopToggle">
+                <label class="form-check-label" for="oldestTopToggle">Oldest on Top</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Logout -->
+        <a href="/logout" class="btn btn-sm btn-primary">🔒 Logout</a>
+      </div>
+    </div>
+  </nav>
+
   <!-- Logout Button and Toggles Container -->
-  <div class="toggle-container text-end" style="position: fixed; top: 10px; right: 10px; z-index: 1000;">
+  <!-- <div class="toggle-container text-end" style="position: fixed; top: 10px; right: 10px; z-index: 1000;">
     <form action="/logout" method="POST" style="margin-bottom: 10px;">
-      <button class="btn btn-sm btn-warning" type="submit">🚪 Logout</button>
+      <button class="btn btn-primary" type="submit">🚪 Logout</button>
     </form>
     <div class="form-check form-switch text-white">
       <input class="form-check-input" type="checkbox" id="themeSwitch" onchange="toggleTheme()">
@@ -138,11 +181,18 @@
         if sort_order=='asc' %}checked{% endif %}>
       <label class="form-check-label" for="sortSwitch">Oldest on Top</label>
     </div>
-  </div>
+  </div> -->
 
   <div class="container mt-4">
-    <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap">
-
+    <!-- <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap">
+      
+      <div class="col-auto d-flex align-items-end">
+        <a href="/signals" class="btn btn-primary">MCX Signals Dashboard </a>
+        <a href="/signals_nse_stock_fno" class="btn btn-primary">NSE FNO Signals Dashboard </a>
+        <a href="/signals_nse_stock" class="btn btn-primary">NSE Stocks Signals Dashboard </a>
+      </div>
+    </form> -->
+    <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap"> 
       <div class="col-auto">
         <label class="form-label">Instrument</label>
         <input class="form-control form-control-sm" list="instrumentList" name="instrument" required
@@ -179,18 +229,9 @@
       </div>
 
       <div class="col-auto d-flex align-items-end">
-        <button type="submit" class="btn btn-sm btn-primary">Submit </button>
+        <button type="submit" class="btn btn-primary">Submit </button>
       </div>
 
-      <div class="col-auto d-flex align-items-end">
-        <a href="/signals" class="btn btn-sm btn-primary">MCX Signals Dashboard </a>
-      </div>
-      <div class="col-auto d-flex align-items-end">
-        <a href="/signals_nse_stock_fno" class="btn btn-sm btn-primary">NSE FNO Signals Dashboard </a>
-      </div>
-      <div class="col-auto d-flex align-items-end">
-        <a href="/signals_nse_stock" class="btn btn-sm btn-primary">NSE Stocks Signals Dashboard </a>
-      </div>
     </form>
 
 
@@ -298,7 +339,18 @@
     const isChecked = document.getElementById("autoRefreshSwitch").checked;
     if (isChecked) startAutoRefresh();
   });
+
+  
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('lightModeToggle').addEventListener('change', function () {
+      document.body.classList.toggle('bg-light');
+      document.body.classList.toggle('text-dark');
+    });
+  </script>
+
 <!-- <script>
 document.getElementById('testTelegramBtn').addEventListener('click', () => {
     const statusDiv = document.getElementById('telegramStatus');
