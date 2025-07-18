@@ -16,10 +16,10 @@ access_token = config['access_token']
 kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
 
-with open('Config/instrument_config.json') as f:
-    config = json.load(f)
+with open('Config/instrument_config.json') as j:
+    config = json.load(j)
 mcx_interval = config['mcx_fno']['interval']
-mcx_volume_threshold = config['mcx_fno']['volume_threshold']
+# mcx_volume_threshold = config['mcx_fno']['volume_threshold']
 
 DB_PATH = 'signals.db'
 CSV_PATH = 'InstrumentsData/instruments_mcx.csv'
@@ -122,7 +122,7 @@ def store_signal_in_db(result):
 
 def is_market_time(now):
     start = now.replace(hour=9, minute=0, second=0, microsecond=0)
-    end = now.replace(hour=23, minute=30, second=0, microsecond=0)
+    end = now.replace(hour=23, minute=00, second=0, microsecond=0)
     return start <= now <= end
 
 
@@ -132,7 +132,7 @@ def background_signal_job():
         print("❌ No instruments found. Exiting.")
         return
 
-    print("🚀 Running signal worker in 3-minute test mode...")
+    print("🚀 Running signal worker in 30-minute test mode...")
 
     while True:
         now = datetime.now()
@@ -156,13 +156,19 @@ def background_signal_job():
                         instrument_token=instrument_token,
                         from_date=from_date,
                         to_date=to_date,
-                        interval=mcx_interval,  # ⏱ test mode######################################################
+                        interval=mcx_interval,
                         continuous=False
                     )
 
                     candles_today = [c for c in candles if pd.to_datetime(c['date']).date() == now.date()]
                     df = pd.DataFrame(candles_today)
                     df.columns = ['date', 'open', 'high', 'low', 'close', 'volume']
+
+                    # 🛠 Convert to proper data types
+                    df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].apply(pd.to_numeric, errors='coerce')
+                    df = df.dropna(subset=['open', 'high', 'low', 'close', 'volume'])  # remove rows with NaNs
+                    # Optional: sort by date if needed
+                    df = df.sort_values('date')
 
                     if len(df) < 3:
                         print(f"⛔ Not enough candles for {symbol}")
@@ -174,7 +180,7 @@ def background_signal_job():
                         current = df.iloc[i]
 
                         volume_delta = ((current['volume'] - prev1['volume']) / prev1['volume']) * 100 if prev1['volume'] != 0 else 0
-                        volume_threshold = mcx_volume_threshold  # 🔍 sensitive for test######################################################
+                        volume_threshold = 100  # 🔍 sensitive for test######################################################
 
                         signal = None
                         if current['close'] > max(prev1['close'], prev2['close']) and volume_delta > volume_threshold:
@@ -204,14 +210,22 @@ def background_signal_job():
 
         time.sleep(60)  # 🔁 run every minute
 
-def send_telegram_alert(symbol, signal_type, price, time,volume_delta):
+def send_telegram_alert(symbol, signal_type, price, time, volume_delta):
     try:
-        bot_token = config["telegram_bot_token"]
-        chat_id = config["telegram_chat_id"]
+        bot_token = config.get("telegram_bot_token")
+        chat_id = config.get("telegram_chat_id")
 
-        text = f"📡 *{signal_type}* signal on *{symbol}*\nPrice: ₹{price}\nTime: {time}\nVolume%:{volume_delta}%"
+        if not bot_token or not chat_id:
+            raise ValueError("Missing Telegram config keys")
+
+        text = (
+            f"📡 *{signal_type}* signal on *{symbol}*\n"
+            f"Price: ₹{price}\n"
+            f"Time: {time}\n"
+            f"Volume%: {volume_delta}%"
+        )
+
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-
         payload = {
             "chat_id": chat_id,
             "text": text,
@@ -225,5 +239,6 @@ def send_telegram_alert(symbol, signal_type, price, time,volume_delta):
             print(f"❌ Telegram send failed: {response.text}")
     except Exception as e:
         print(f"❌ Telegram error: {e}")
+
 if __name__ == "__main__":
     background_signal_job()

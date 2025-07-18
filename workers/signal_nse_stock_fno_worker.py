@@ -119,7 +119,7 @@ def store_signal_in_db(result):
 
 def is_market_time(now):
     start = now.replace(hour=9, minute=15, second=0, microsecond=0)
-    end = now.replace(hour=3, minute=0, second=0, microsecond=0)
+    end = now.replace(hour=15, minute=0, second=0, microsecond=0)
     return start <= now <= end
 
 

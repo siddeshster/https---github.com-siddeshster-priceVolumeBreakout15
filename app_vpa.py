@@ -223,8 +223,6 @@ def logout():
     flash("🔓 Logged out successfully", "info")
     return redirect(url_for("login"))
 
-
-
 @app.before_request
 def extend_session():
     session.permanent = True
