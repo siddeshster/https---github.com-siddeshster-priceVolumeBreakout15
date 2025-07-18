@@ -1,35 +1,27 @@
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, session, url_for, flash, jsonify 
+
 from kiteconnect import KiteConnect
 import json
 import pandas as pd
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, redirect, url_for, session
-import hashlib
-from flask import session
-from datetime import timedelta
-from datetime import datetime
+
 import sqlite3
 from workers.signal_worker import send_telegram_alert
 from workers.signal_nse_stock_fno_worker import send_telegram_alert
 from workers.signal_nse_stock_worker import send_telegram_alert
 from workers.signal_worker import send_telegram_alert
-from datetime import datetime, timedelta
-import pandas as pd
-from flask import jsonify, request
-from flask import Flask, render_template, request, redirect, session, url_for, flash
+
 from auth_utils import verify_user, get_user_roles
-from datetime import datetime
-import sqlite3
+
 from functools import wraps
 
-
-
-
+from admin_routes import admin_dashboard, admin_bp
 
 app = Flask(__name__)
 app.secret_key = 'Paswd#1234'
 app.permanent_session_lifetime = timedelta(days=1)
+app.register_blueprint(admin_bp)
 
 
 # Load config
@@ -195,6 +187,8 @@ def login():
 
     return render_template("login.html",datetime=datetime)
 
+
+
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
@@ -350,25 +344,35 @@ if __name__ == "__main__":
 
 
 
-# @app.route('/login', methods=['GET', 'POST'])
 # def login():
-#     with open('Config/users.json') as f:
-#         users = json.load(f)
-
-#     error = None
 #     if request.method == 'POST':
 #         username = request.form['username']
 #         password = request.form['password']
 
-#         # Validate credentials from users.json
-#         if username in users and users[username]['password'] == password:
-#             session.permanent = True  # 🔐 Keep session alive until logout
-#             session['username'] = username
-#             return redirect(url_for('index'))
-#         else:
-#             error = "Invalid credentials"
+#         if verify_user(username, password):
+#             conn = sqlite3.connect('signals.db')
+#             cursor = conn.cursor()
+#             cursor.execute("SELECT status, validfrom, validto FROM USERS WHERE username = ?", (username,))
+#             user = cursor.fetchone()
+#             conn.close()
 
-#     return render_template("login.html", error=error)
+#             if user:
+#                 status, validfrom, validto = user
+#                 today = datetime.today().date()
+#                 # if status == 'ACTIVE' and validfrom <= str(today) <= validto:
+#                 if status == 'ACTIVE':
+#                     session['username'] = username
+#                     session['roles'] = get_user_roles(username)
+#                     return redirect(url_for('dashboard'))
+
+#                 else:
+#                     flash("⚠️ User access expired or inactive.", "danger")
+#             else:
+#                 flash("❌ User not found.", "danger")
+#         else:
+#             flash("❌ Invalid credentials", "danger")
+
+#     return render_template("login.html",datetime=datetime)
 
 
 # @app.route('/logout', methods=['POST'])

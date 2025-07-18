@@ -10,6 +10,10 @@ import requests
 with open('Config/config.json') as f:
     config = json.load(f)
 
+with open('Config/instrument_config.json') as j:
+    config = json.load(j)
+nse_stock_interval = config['nse_stocks']['interval']
+
 api_key = config['api_key']
 access_token = config['access_token']
 interval =config
@@ -154,7 +158,7 @@ def background_signal_job():
                         instrument_token=instrument_token,
                         from_date=from_date,
                         to_date=to_date,
-                        interval="10minute",  # ⏱ test mode
+                        interval=nse_stock_interval,  # ⏱ test mode
                         continuous=False
                     )
 

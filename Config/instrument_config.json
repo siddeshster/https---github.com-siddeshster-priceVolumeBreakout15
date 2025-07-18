@@ -4,11 +4,11 @@
     "volume_threshold": 100
   },
     "nse_fno":{
-    "interval": "10minute",
+    "interval": "15minute",
     "volume_threshold": 100
   },
     "nse_stocks":{
-    "interval": "10minute",
+    "interval": "15minute",
     "volume_threshold": 100
   }
 }
