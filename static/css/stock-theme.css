@@ -1,0 +1,127 @@
+/* stock-theme.css - Custom Bootstrap Theme for Stock Market Apps */
+
+body {
+    background-color: #0b0f1a;
+    color: #f1f1f1;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.navbar {
+    background-color: #121c2e;
+    border-bottom: 2px solid #1a253c;
+}
+
+.navbar-brand, .nav-link, .dropdown-item {
+    color: #f8f9fa !important;
+    font-weight: 600;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #00d09c !important;
+}
+
+.card {
+    background-color: #141d33;
+    color: #ffffff;
+    border: 1px solid #2c3e50;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.table {
+    background-color: #1b2738;
+    color: #e0e0e0;
+    border-collapse: collapse;
+}
+
+.table thead th {
+    background-color: #1c2e4a;
+    color: #ffffff;
+    border-bottom: 1px solid #2c3e50;
+}
+
+.table tbody tr:hover {
+    background-color: #273c59;
+}
+
+.table td, .table th {
+    padding: 12px;
+}
+
+.btn {
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.btn-success {
+    background-color: #00c88f;
+    border-color: #00c88f;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    border-color: #e74c3c;
+}
+
+.btn-primary {
+    background-color: #2e86de;
+    border-color: #2e86de;
+}
+
+input, select, textarea {
+    background-color: #1e2b40 !important;
+    border: 1px solid #2c3e50 !important;
+    color: #ffffff !important;
+}
+
+input::placeholder {
+    color: #b0b8c1 !important;
+}
+
+.alert {
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: #143d2d;
+    border-color: #00d09c;
+    color: #00d09c;
+}
+
+.alert-danger {
+    background-color: #3d1414;
+    border-color: #e74c3c;
+    color: #ff6f6f;
+}
+
+.alert-info {
+    background-color: #142c3d;
+    border-color: #2e86de;
+    color: #72caff;
+}
+
+hr {
+    border-color: #2c3e50;
+}
+
+strong.signal-bullish {
+    color: #00ffae;
+}
+
+strong.signal-bearish {
+    color: #ff5f5f;
+}
+
+footer {
+    padding: 1rem;
+    background-color: #0e1726;
+    text-align: center;
+    color: #777;
+    font-size: 0.85rem;
+}

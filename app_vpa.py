@@ -328,12 +328,12 @@ def signal_table_partial_nse_stock():
 
 # ---------------------------------------------------------------------------
 
-@app.route("/test-telegram", methods=["POST"])
-def test_telegram():
+# @app.route("/test-telegram", methods=["POST"])
+# def test_telegram():
 
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    send_telegram_alert("TESTSYM", "BULLISH", 123.45, now_str)
-    return jsonify({"message": "✅ Test Telegram Alert Sent"})
+#     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#     send_telegram_alert("TESTSYM", "BULLISH", 123.45, now_str)
+#     return jsonify({"message": "✅ Test Telegram Alert Sent"})
 
 
 

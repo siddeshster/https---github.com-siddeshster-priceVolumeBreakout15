@@ -9,13 +9,14 @@ import requests
 # Load config
 with open('Config/config.json') as f:
     config = json.load(f)
+api_key = config['api_key']
+access_token = config['access_token']
 
 with open('Config/instrument_config.json') as j:
     config = json.load(j)
 nse_stock_interval = config['nse_stocks']['interval']
 
-api_key = config['api_key']
-access_token = config['access_token']
+
 interval =config
 
 kite = KiteConnect(api_key=api_key)

@@ -9,13 +9,15 @@ import requests
 # Load config
 with open('Config/config.json') as f:
     config = json.load(f)
+api_key = config['api_key']
+access_token = config['access_token']
+
 
 with open('Config/instrument_config.json') as j:
     config = json.load(j)
 nse_fno_interval = config['nse_fno']['interval']
 
-api_key = config['api_key']
-access_token = config['access_token']
+
 
 kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
