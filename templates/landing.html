@@ -1,136 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>VPA Trading System - Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: 'Segoe UI', sans-serif;
-        }
+  <meta charset="UTF-8">
+  <title>VPA Trading System - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        .navbar {
-            background-color: #1f1f1f;
-            border-bottom: 1px solid #333;
-        }
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Custom Theme -->
+  <link href="{{ url_for('static', filename='css/stock-theme.css') }}" rel="stylesheet">
 
-        .navbar .nav-link, .navbar-brand {
-            color: #ffffff;
-        }
-
-        .logout-btn {
-            margin-left: auto;
-        }
-
-        .card-option {
-            background-color: #1e1e1e;
-            color: #ffffff;
-            border: 1px solid #2c2c2c;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            transition: all 0.3s ease-in-out;
-            height: 100%;
-        }
-
-        .card-option:hover {
-            background-color: #2b2b2b;
-            transform: translateY(-3px);
-            border-color: #007bff;
-            box-shadow: 0 0 12px rgba(0, 123, 255, 0.3);
-        }
-
-        .card-option h5 {
-            color: #00bcd4;
-            font-weight: bold;
-        }
-
-        .container {
-            margin-top: 60px;
-        }
-
-        .footer {
-            margin-top: 60px;
-            color: #777;
-            font-size: 13px;
-            text-align: center;
-        }
-    </style>
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-dark text-white">
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container-fluid px-4">
-        <a class="navbar-brand" href="#">📈 VPA Trading System</a>
-        <div class="logout-btn">
-            <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
-        </div>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
+    <a class="navbar-brand fw-bold" href="#">📈 VPA Trading System</a>
+    <div class="ms-auto">
+      <a href="/logout" class="btn btn-danger">Logout</a>
     </div>
-</nav>
+  </nav>
 
-<!-- Dashboard Cards -->
-<div class="container">
+  <div class="container py-4">
+    <h3 class="mb-4 text-info">📊 Dashboard</h3>
     <div class="row g-4">
-        {% if roles.nse_stock %}
-        <div class="col-md-4">
-            <a href="/signals_nse_stock" class="text-decoration-none">
-                <div class="card-option">
-                    <h5>📊 NSE Stocks Signals</h5>
-                    <p>View signal dashboard for NSE stocks</p>
-                </div>
-            </a>
-        </div>
-        {% endif %}
 
-        {% if roles.nse_fno %}
-        <div class="col-md-4">
-            <a href="/signals_nse_stock_fno" class="text-decoration-none">
-                <div class="card-option">
-                    <h5>📈 NSE FNO Signals</h5>
-                    <p>Futures & Options signal dashboard</p>
-                </div>
-            </a>
+      <!-- NSE Stock Signals -->
+      <div class="col-md-4">
+        <div class="card border-light bg-dark h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-primary"><i class="fa-solid fa-chart-column"></i> NSE Stocks Signals</h5>
+            <p class="card-text">View signal dashboard for NSE stocks.</p>
+            <a href="/signals_nse_stock" class="btn btn-outline-primary w-100">Go</a>
+          </div>
         </div>
-        {% endif %}
+      </div>
 
-        {% if roles.mcx_fno %}
-        <div class="col-md-4">
-            <a href="/signals" class="text-decoration-none">
-                <div class="card-option">
-                    <h5>💹 MCX Signals</h5>
-                    <p>Live signals for MCX commodities</p>
-                </div>
-            </a>
+      <!-- NSE FNO Signals -->
+      <div class="col-md-4">
+        <div class="card border-light bg-dark h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-warning"><i class="fa-solid fa-money-bill-trend-up"></i> NSE FNO Signals</h5>
+            <p class="card-text">Futures & Options signal dashboard.</p>
+            <a href="/signals_nse_stock_fno" class="btn btn-outline-warning w-100">Go</a>
+          </div>
         </div>
-        {% endif %}
+      </div>
 
-        <div class="col-md-4 offset-md-4">
-            <a href="vpa_analysis" class="text-decoration-none">
-                <div class="card-option">
-                    <h5>🧠 VPA Analysis Dashboard</h5>
-                    <p>Live price-volume analysis</p>
-                </div>
-            </a>
+      <!-- MCX Signals -->
+      <div class="col-md-4">
+        <div class="card border-light bg-dark h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-success"><i class="fa-solid fa-oil-can"></i> MCX Signals</h5>
+            <p class="card-text">Live signals for MCX commodities.</p>
+            <a href="/signals" class="btn btn-outline-success w-100">Go</a>
+          </div>
         </div>
-        
-        <div class="col-md-4 offset-md-4">
-            <a href="/admin" class="text-decoration-none">
-                <div class="card-option">
-                    <h5>Admin Dashboard</h5>
-                    <p>Admin Dashboard</p>
-                </div>
-            </a>
+      </div>
+
+      <!-- VPA Analysis -->
+      <div class="col-md-4">
+        <div class="card border-light bg-dark h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-info"><i class="fa-solid fa-brain"></i> VPA Analysis Dashboard</h5>
+            <p class="card-text">Live price-volume analysis.</p>
+            <a href="/vpa_analysis" class="btn btn-outline-info w-100">Go</a>
+          </div>
         </div>
+      </div>
+
+      <!-- Admin Dashboard (Only for Admin) -->
+      {% if session['user_type'] == 'ADMIN' %}
+      <div class="col-md-4">
+        <div class="card border-light bg-dark h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-danger"><i class="fa-solid fa-user-shield"></i> Admin Dashboard</h5>
+            <p class="card-text">Admin configuration and controls.</p>
+            <a href="/admin" class="btn btn-outline-danger w-100">Go</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
     </div>
-</div>
+  </div>
 
-<!-- Footer -->
-<!-- <div class="footer mt-5">
-    &copy; {{ datetime.utcnow().year }} VPA Trading System. All rights reserved.
-</div> -->
+  <footer class="text-center mt-4 mb-2 text-secondary small">
+    &copy; {{ datetime.utcnow().year }} VPA Trading System
+  </footer>
 
 </body>
 </html>

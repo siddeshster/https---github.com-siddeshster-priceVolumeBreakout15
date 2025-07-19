@@ -3,131 +3,29 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Volume Price Analysis System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live Analysis</title>
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 13px;
-    }
-
-    .theme-dark {
-      background-color: #0f111a;
-      color: #e0e0e0;
-    }
-
-    .theme-dark .form-select,
-    .theme-dark .form-control {
-      background-color: #1a1a1a;
-      color: #ffffff;
-      border-color: #333;
-    }
-
-    .theme-dark .form-control:focus,
-    .theme-dark .form-select:focus {
-      border-color: #00ff00;
-      box-shadow: none;
-    }
-
-    .table th,
-    .table td {
-      vertical-align: middle;
-      text-align: center;
-    }
-
-    .table thead th {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background-color: #1a1a1a;
-      color: #ccc;
-    }
-
-    .table-success {
-      background-color: #003300 !important;
-      color: #00ff00;
-    }
-
-    .table-danger {
-      background-color: #330000 !important;
-      color: #ff4d4d;
-    }
-
-    .text-bullish {
-      color: #00ff00;
-      font-weight: bold;
-    }
-
-    .text-bearish {
-      color: #ff4d4d;
-      font-weight: bold;
-    }
-
-    .switch-container {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 1000;
-    }
-
-    .form-check-label {
-      font-size: 12px;
-    }
-
-    .table-responsive {
-      max-height: 75vh;
-      overflow-y: auto;
-    }
-
-    .btn-primary {
-      font-size: 13px;
-    }
-
-    .form-floating-label {
-      font-size: 12px;
-    }
-
-    .switch-container {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 5px;
-      z-index: 9999;
-    }
-
-    .switch-container form {
-      margin-top: 5px;
-    }
-
-  th.momentum-col,
-  td.momentum-col {
-    padding: 4px 6px;
-    font-size: 12px;
-    white-space: nowrap;
-    min-width: 120px;
-  }
-</style>
-
-  </style>
+  <!-- Custom Stock Market Theme -->
+  <link href="{{ url_for('static', filename='css/stock-theme.css') }}" rel="stylesheet">
 </head>
 
 <body class="theme-dark" id="themeBody">
 
   <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg px-3">
-    <div class="container-fluid">
-      <div class="d-flex gap-2">
-        <a href="/dashboard" rel="stylesheet">← Back to Dashboard</a>
-      </div>
 
-      <div class="d-flex ms-auto align-items-center gap-3">
-        <!-- Dropdown for options -->
-        <div class="dropdown">
+
+  <!-- <div class="d-flex ms-auto align-items-center gap-3"> -->
+  <!-- Dropdown for options -->
+  
+      <!-- </div>  -->
+
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3>📡 Live Analysis</h3>
+      <a href="/dashboard" rel="stylesheet">← Back to Dashboard</a>
+      <div class="dropdown">
           <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
             ⚙️ Options
           </button>
@@ -152,45 +50,9 @@
             </li>
           </ul>
         </div>
-
-        <!-- Logout -->
-        <a href="/logout" class="btn btn-sm btn-primary">🔒 Logout</a>
-      </div>
     </div>
-  </nav>
-
-  <!-- Logout Button and Toggles Container -->
-  <!-- <div class="toggle-container text-end" style="position: fixed; top: 10px; right: 10px; z-index: 1000;">
-    <form action="/logout" method="POST" style="margin-bottom: 10px;">
-      <button class="btn btn-primary" type="submit">🚪 Logout</button>
-    </form>
-    <div class="form-check form-switch text-white">
-      <input class="form-check-input" type="checkbox" id="themeSwitch" onchange="toggleTheme()">
-      <label class="form-check-label" for="themeSwitch">Light Mode</label>
-    </div>
-
-  <div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" id="autoRefreshSwitch" onchange="toggleRefresh()">
-    <label class="form-check-label" for="autoRefreshSwitch">Auto Refresh</label>
-  </div>
-
-    <div class="form-check form-switch text-white">
-      <input class="form-check-input" type="checkbox" id="sortSwitch" name="sortSwitch" onchange="this.form.submit()" {%
-        if sort_order=='asc' %}checked{% endif %}>
-      <label class="form-check-label" for="sortSwitch">Oldest on Top</label>
-    </div>
-  </div> -->
-
-  <div class="container mt-4">
-    <!-- <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap">
-      
-      <div class="col-auto d-flex align-items-end">
-        <a href="/signals" class="btn btn-primary">MCX Signals Dashboard </a>
-        <a href="/signals_nse_stock_fno" class="btn btn-primary">NSE FNO Signals Dashboard </a>
-        <a href="/signals_nse_stock" class="btn btn-primary">NSE Stocks Signals Dashboard </a>
-      </div>
-    </form> -->
-    <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap"> 
+    
+    <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap">
       <div class="col-auto">
         <label class="form-label">Instrument</label>
         <input class="form-control form-control-sm" list="instrumentList" name="instrument" required
@@ -241,7 +103,7 @@
 
     {% if data %}
     <div class="table-responsive mt-4">
-      <table class="table table-dark table-bordered table-sm">
+      <table class="table table-dark table-striped table-bordered">
         <thead>
           <tr>
             <th>Date</th>
@@ -257,12 +119,15 @@
         </thead>
         <tbody>
           {% for row in data %}
-          <tr class="{% if row.signal == 'BULLISH' %}table-success{% elif row.signal == 'BEARISH' %}table-danger{% endif %}">
+          <tr
+            class="{% if row.signal == 'BULLISH' %}table-success{% elif row.signal == 'BEARISH' %}table-danger{% endif %}">
             <td>{{ row.date[:16].split(' ')[1] }}</td>
-            <td class="{% if row.signal == 'BULLISH' %}text-bullish{% elif row.signal == 'BEARISH' %}text-bearish{% endif %}">
+            <td
+              class="{% if row.signal == 'BULLISH' %}text-bullish{% elif row.signal == 'BEARISH' %}text-bearish{% endif %}">
               {{ row.signal }}
             </td>
-            <td class="{% if row.signal2 == 'BULLISH' %}text-success{% elif row.signal2 == 'BEARISH' %}text-danger{% endif %}">
+            <td
+              class="{% if row.signal2 == 'BULLISH' %}text-success{% elif row.signal2 == 'BEARISH' %}text-danger{% endif %}">
               {{ row.signal2 }}
             </td>
             <td>{{ row.volume }}</td>
@@ -310,35 +175,35 @@
     };
 
     let refreshTimer;
-  function startAutoRefresh() {
-    refreshTimer = setInterval(() => {
-      const form = document.querySelector("form");
-      if (form) {
-        form.submit(); // uses current session context
-      }
-    }, 10000); // 10 seconds
-  }
-
-  function stopAutoRefresh() {
-    clearInterval(refreshTimer);
-  }
-
-  function toggleRefresh() {
-    const isChecked = document.getElementById("autoRefreshSwitch").checked;
-    if (isChecked) {
-      startAutoRefresh();
-    } else {
-      stopAutoRefresh();
+    function startAutoRefresh() {
+      refreshTimer = setInterval(() => {
+        const form = document.querySelector("form");
+        if (form) {
+          form.submit(); // uses current session context
+        }
+      }, 10000); // 10 seconds
     }
-  }
 
-  // ✅ Wait until page is ready
-  document.addEventListener("DOMContentLoaded", () => {
-    const isChecked = document.getElementById("autoRefreshSwitch").checked;
-    if (isChecked) startAutoRefresh();
-  });
+    function stopAutoRefresh() {
+      clearInterval(refreshTimer);
+    }
 
-  
+    function toggleRefresh() {
+      const isChecked = document.getElementById("autoRefreshSwitch").checked;
+      if (isChecked) {
+        startAutoRefresh();
+      } else {
+        stopAutoRefresh();
+      }
+    }
+
+    // ✅ Wait until page is ready
+    document.addEventListener("DOMContentLoaded", () => {
+      const isChecked = document.getElementById("autoRefreshSwitch").checked;
+      if (isChecked) startAutoRefresh();
+    });
+
+
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -349,7 +214,7 @@
     });
   </script>
 
-<!-- <script>
+  <!-- <script>
 document.getElementById('testTelegramBtn').addEventListener('click', () => {
     const statusDiv = document.getElementById('telegramStatus');
     statusDiv.innerText = '⏳ Sending alert...';
