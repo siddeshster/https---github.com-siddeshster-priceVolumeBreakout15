@@ -4,20 +4,81 @@ body {
     background-color: #0b0f1a;
     color: #f1f1f1;
     font-family: 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
 }
 
+
+/* General Navbar Container */
 .navbar {
-    background-color: #121c2e;
-    border-bottom: 2px solid #1a253c;
+    background-color: #1a1a1a;
+    /* Very dark grey, almost black, to match the background's depth */
+    border-bottom: 1px solid #333;
+    /* Subtle dark border at the bottom */
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    /* Modern, readable font */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    /* Slight shadow for depth */
 }
 
-.navbar-brand, .nav-link, .dropdown-item {
-    color: #f8f9fa !important;
-    font-weight: 600;
+/* Navbar Links */
+.navbar a {
+    color: #e0e0e0;
+    /* Light grey for text, stands out against dark background */
+    text-decoration: none;
+    padding: 8px 15px;
+    margin: 0 5px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    /* Smooth transition for hover effects */
 }
 
-.navbar-nav .nav-link:hover {
-    color: #00d09c !important;
+/* Navbar Link Hover/Focus State */
+.navbar a:hover,
+.navbar a:focus {
+    color: #ffffff;
+    /* Pure white on hover for highlight */
+    background-color: rgba(60, 60, 60, 0.4);
+    /* Slightly lighter, semi-transparent dark grey */
+    border-radius: 4px;
+    /* Slightly rounded corners for a modern feel */
+}
+
+/* Active Navbar Link (if applicable) */
+.navbar a.active {
+    color: #4CAF50;
+    /* A subtle green, reminiscent of the uptrend in the chart */
+    border-bottom: 2px solid #4CAF50;
+    font-weight: bold;
+}
+
+/* Navbar Brand/Logo */
+.navbar-brand {
+    color: #00e676;
+    /* A vibrant green, symbolizing growth/data */
+    font-size: 5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Optional: Search Bar Style (if your navbar includes one) */
+.navbar-search-input {
+    background-color: #333;
+    border: 1px solid #555;
+    color: #e0e0e0;
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.navbar-search-input::placeholder {
+    color: #a0a0a0;
 }
 
 .card {
@@ -49,7 +110,8 @@ body {
     background-color: #273c59;
 }
 
-.table td, .table th {
+.table td,
+.table th {
     padding: 12px;
 }
 
@@ -73,7 +135,9 @@ body {
     border-color: #2e86de;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
     background-color: #1e2b40 !important;
     border: 1px solid #2c3e50 !important;
     color: #ffffff !important;
@@ -132,10 +196,16 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('../images/backgrd_login.png'); /* Update this path */
+    background-image: url('../images/backgrd_login.png');
+    /* Update this path */
     background-size: cover;
     background-position: center;
-    filter: blur(8px) brightness(0.7); /* Blur and slightly darken the image */
-    transform: scale(1.05); /* Slight scale to avoid blur edges */
-    z-index: -1; /* Place it behind other content */
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    filter: blur(0.1px) brightness(2);
+    /* Blur and slightly darken the image */
+    transform: scale(1.05);
+    /* Slight scale to avoid blur edges */
+    z-index: -1;
+    /* Place it behind other content */
 }
