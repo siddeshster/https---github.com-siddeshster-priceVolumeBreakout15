@@ -100,30 +100,7 @@
     </script>
 
 
-    <!-- <script>
-        document.getElementById('testTelegramBtn').addEventListener('click', () => {
-            const statusDiv = document.getElementById('telegramStatus');
-            statusDiv.innerText = '⏳ Sending alert...';
-
-            fetch('/test-telegram', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error("Network error");
-                    return response.json();
-                })
-                .then(data => {
-                    statusDiv.innerText = data.message;
-                })
-                .catch(err => {
-                    console.error('Telegram error:', err);
-                    statusDiv.innerText = '❌ Failed to send alert.';
-                });
-        });
-    </script> -->
+    
     <div class="background-image"></div>
 </body>
 

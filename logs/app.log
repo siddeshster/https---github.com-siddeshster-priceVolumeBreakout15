@@ -244,3 +244,50 @@
 2025-07-20 15:48:48,879 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:48:48] "GET /login?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
 2025-07-20 15:48:49,062 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:48:49] "GET /login?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
 2025-07-20 15:50:23,446 [INFO] -  * Detected change in 'c:\\Users\\ADMIN\\OneDrive\\Documents\\PRICE_VOLUME_ALGO\\app_vpa.py', reloading
+2025-07-20 15:50:24,207 [INFO] -  * Restarting with stat
+2025-07-20 15:50:31,296 [WARNING] -  * Debugger is active!
+2025-07-20 15:50:31,310 [INFO] -  * Debugger PIN: 892-485-022
+2025-07-20 15:50:31,611 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:31] "GET /login HTTP/1.1" 200 -
+2025-07-20 15:50:31,894 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:31] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:50:34,068 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:34] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-07-20 15:50:34,134 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:34] "GET /dashboard HTTP/1.1" 200 -
+2025-07-20 15:50:34,268 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:34] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:50:35,933 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:35] "GET /vpa_analysis HTTP/1.1" 200 -
+2025-07-20 15:50:36,074 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:36] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:50:48,792 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:48] "GET /vpa_analysis HTTP/1.1" 200 -
+2025-07-20 15:50:48,918 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:48] "GET /static/css/stock-theme.css HTTP/1.1" 200 -
+2025-07-20 15:50:49,045 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:49] "GET /static/images/backgrd_login.png HTTP/1.1" 200 -
+2025-07-20 15:50:49,721 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:49] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-07-20 15:50:53,168 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:53] "GET /dashboard HTTP/1.1" 200 -
+2025-07-20 15:50:53,286 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:53] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:50:54,433 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:54] "GET /signals_nse_stock HTTP/1.1" 200 -
+2025-07-20 15:50:54,587 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:54] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:50:56,730 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:56] "GET /dashboard HTTP/1.1" 200 -
+2025-07-20 15:50:56,855 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:56] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:50:58,339 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:58] "GET /signals_nse_stock_fno HTTP/1.1" 200 -
+2025-07-20 15:50:58,459 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:50:58] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:51:00,554 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:51:00] "GET /dashboard HTTP/1.1" 200 -
+2025-07-20 15:51:00,681 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:51:00] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:51:01,719 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:51:01] "GET /signals HTTP/1.1" 200 -
+2025-07-20 15:51:01,881 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:51:01] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:51:18,393 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:51:18] "GET /signals/table HTTP/1.1" 200 -
+2025-07-20 15:51:33,074 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:51:33] "GET /signals/table HTTP/1.1" 200 -
+2025-07-20 15:51:42,593 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:51:42] "GET /dashboard HTTP/1.1" 200 -
+2025-07-20 15:51:42,741 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:51:42] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:51:44,073 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:51:44] "GET /signals_nse_stock_fno HTTP/1.1" 200 -
+2025-07-20 15:51:44,193 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:51:44] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:52:13,953 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:52:13] "GET /signals_nse_stock_fno HTTP/1.1" 200 -
+2025-07-20 15:52:14,064 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:52:14] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:53:04,533 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:04] "GET /vpa_analysis HTTP/1.1" 200 -
+2025-07-20 15:53:05,102 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:05] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:53:19,736 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:19] "GET /vpa_analysis HTTP/1.1" 200 -
+2025-07-20 15:53:19,836 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:19] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:53:25,286 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:25] "GET /dashboard HTTP/1.1" 200 -
+2025-07-20 15:53:25,405 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:25] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:53:26,237 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:26] "[33mGET /wp-admin/setup-config.php HTTP/1.1[0m" 404 -
+2025-07-20 15:53:37,018 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:37] "[32mGET /logout HTTP/1.1[0m" 302 -
+2025-07-20 15:53:37,068 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:37] "GET /login HTTP/1.1" 200 -
+2025-07-20 15:53:37,252 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:37] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
+2025-07-20 15:53:45,916 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:45] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-07-20 15:53:45,949 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:45] "GET /dashboard HTTP/1.1" 200 -
+2025-07-20 15:53:46,108 [INFO] - 127.0.0.1 - - [20/Jul/2025 15:53:46] "[36mGET /static/css/stock-theme.css HTTP/1.1[0m" 304 -
