@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2 class="text-info mb-4">📊 Dashboard</h2>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <a href="/signals_nse_stock" class="card h-100 bg-dark border-info text-decoration-none dashboard-card">
+        <div class="card-body">
+          <h5 class="card-title text-info">📈 NSE Stocks Signals</h5>
+          <p class="card-text text-light">View signal dashboard for NSE stocks.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4">
+      <a href="/signals_nse_stock_fno" class="card h-100 bg-dark border-warning text-decoration-none dashboard-card">
+        <div class="card-body">
+          <h5 class="card-title text-warning">🪙 NSE FNO Signals</h5>
+          <p class="card-text text-light">Futures & Options signal dashboard.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4">
+      <a href="/signals" class="card h-100 bg-dark border-success text-decoration-none dashboard-card">
+        <div class="card-body">
+          <h5 class="card-title text-success">🟢 MCX Signals</h5>
+          <p class="card-text text-light">Live signals for MCX commodities.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4">
+      <a href="/vpa_analysis" class="card h-100 bg-dark border-primary text-decoration-none dashboard-card">
+        <div class="card-body">
+          <h5 class="card-title text-primary">🧠 VPA Analysis Dashboard</h5>
+          <p class="card-text text-light">Live price-volume analysis.</p>
+        </div>
+      </a>
+    </div>
+
+    {% if session.get('user_type') == 'ADMIN' %}
+    <div class="col-md-4">
+      <a href="/admin" class="card h-100 bg-dark border-danger text-decoration-none dashboard-card">
+        <div class="card-body">
+          <h5 class="card-title text-danger">⚙️ Admin Dashboard</h5>
+          <p class="card-text text-light">Admin control panel & configuration.</p>
+        </div>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

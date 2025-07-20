@@ -12,11 +12,32 @@ from workers.signal_nse_stock_fno_worker import send_telegram_alert
 from workers.signal_nse_stock_worker import send_telegram_alert
 from workers.signal_worker import send_telegram_alert
 
-from auth_utils import verify_user, get_user_roles
+from auth_utils import verify_user, get_user_roles,update_session_status
 
 from functools import wraps
 
 from admin_routes import admin_dashboard, admin_bp
+import logging
+from logging.handlers import RotatingFileHandler
+import os
+
+# Create logs directory if not exists
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
+log_file = 'logs/app.log'
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] - %(message)s',
+    handlers=[
+        RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=3),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
 
 app = Flask(__name__)
 app.secret_key = 'Paswd#1234'
@@ -177,7 +198,7 @@ def login():
                     session['username'] = username
                     session['roles'] = get_user_roles(username)
                     return redirect(url_for('dashboard'))
-
+                    update_sessions(username)
                 else:
                     flash("⚠️ User access expired or inactive.", "danger")
             else:
@@ -186,6 +207,7 @@ def login():
             flash("❌ Invalid credentials", "danger")
 
     return render_template("login.html",datetime=datetime)
+
 
 
 
@@ -216,6 +238,26 @@ def logout():
     session.clear()
     flash("🔓 Logged out successfully", "info")
     return redirect(url_for("login"))
+# @app.route('/logout')
+# def logout():
+#     username = session.get('username')
+#     if username:
+#         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#         conn = sqlite3.connect('signals.db')
+#         c = conn.cursor()
+#         c.execute("""
+#             UPDATE USERS_SESSION SET logout_time = ?, LOGIN_status = 'LOGGED_OUT'
+#             WHERE username = ?
+#         """, (now, username))
+#         conn.commit()
+#         conn.close()
+
+#         print(f"🚪 User {username} logged out at {now}")
+
+#     session.clear()
+#     flash("Logged out successfully.", "success")
+#     return redirect(url_for('login'))
+
 
 @app.before_request
 def extend_session():

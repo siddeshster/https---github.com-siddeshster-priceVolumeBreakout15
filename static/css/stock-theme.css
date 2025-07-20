@@ -1,5 +1,33 @@
 /* stock-theme.css - Custom Bootstrap Theme for Stock Market Apps */
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
 
+.dashboard-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+}
+
+.dashboard-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  cursor: pointer;
+}
+
+.dashboard-container {
+  min-height: 100vh;
+  background: url('/static/images/image_backgrd.png') no-repeat center center fixed;
+  background-size: cover;
+}
+
+.card {
+  background-color: rgba(0, 0, 0, 0.85);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+
+/* 
 body {
     background-color: #0b0f1a;
     color: #f1f1f1;
@@ -7,7 +35,7 @@ body {
     overflow-x: hidden;
     margin: 0;
     padding: 0;
-}
+} */
 
 
 /* General Navbar Container */

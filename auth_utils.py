@@ -18,3 +18,17 @@ def get_user_roles(username):
     row = cursor.fetchone()
     conn.close()
     return dict(row) if row else {}
+
+def update_session_status(username, status):
+    conn = sqlite3.connect('signals.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO USERS_SESSION (USERNAME, LOGIN_STATUS)
+        VALUES (?, ?)
+        ON CONFLICT(USERNAME) DO UPDATE SET LOGIN_STATUS = excluded.LOGIN_STATUS
+    """, (username, status))
+
+    conn.commit()
+    conn.close()
+
