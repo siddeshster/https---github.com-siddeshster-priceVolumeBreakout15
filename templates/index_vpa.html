@@ -49,7 +49,7 @@
 
     <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap text-white">
       <div class="col-auto">
-        <label class="form-label">Instrument</label>
+        <label class="form-label">INSTRUMENT</label>
         <input class="form-control form-control-sm" list="instrumentList" name="instrument" required
           value="{{ symbol or '' }}">
         <datalist id="instrumentList">
@@ -60,12 +60,12 @@
       </div>
 
       <div class="col-auto">
-        <label class="form-label">Date</label>
+        <label class="form-label">DATE</label>
         <input type="date" name="date" class="form-control form-control-sm" required value="{{ date or '' }}">
       </div>
 
       <div class="col-auto">
-        <label class="form-label">Interval</label>
+        <label class="form-label">INTERVAL</label>
         <select name="interval" class="form-select form-select-sm">
           <option value="minute" {% if interval=='1minute' %}selected{% endif %}>1 Min</option>
           <option value="3minute" {% if interval=='3minute' %}selected{% endif %}>3 Min</option>
@@ -78,13 +78,13 @@
       </div>
 
       <div class="col-auto">
-        <label class="form-label">Volume Breakout %</label>
+        <label class="form-label">VOLUME BREAKOUT %</label>
         <input type="number" step="0.1" name="volume_breakout" class="form-control form-control-sm" required
           value="{{ volume_threshold or 0 }}">
       </div>
 
       <div class="col-auto d-flex align-items-end">
-        <button type="submit" class="btn btn-primary">Submit </button>
+        <button type="submit" class="btn btn-primary">SUBMIT </button>
       </div>
 
     </form>
@@ -97,19 +97,19 @@
     {% endif %}
 
     {% if data %}
-    <div class="table-responsive mt-4">
-      <table class="table table-dark table-striped table-bordered">
+<div class="table-container mt-4">
+  <table class="table table-dark table-striped table-bordered fixed-header">
         <thead>
           <tr>
-            <th>Date</th>
-            <th class="momentum-col">Momentum (W)</th>
-            <th class="momentum-col">Momentum (W/O)</th>
-            <th>Volume</th>
-            <th>Volume Change %</th>
-            <th>Close</th>
-            <th>Open</th>
-            <th>High</th>
-            <th>Low</th>
+            <th>TIME</th>
+            <th class="momentum-col">VCP MNMX NG</th>
+            <th class="momentum-col">VCP MNMX</th>
+            <th>VOLUME</th>
+            <th>VOLUME CHANGE %</th>
+            <th>CLOSE</th>
+            <th>OPEN</th>
+            <th>HIGH</th>
+            <th>LOW</th>
           </tr>
         </thead>
         <tbody>

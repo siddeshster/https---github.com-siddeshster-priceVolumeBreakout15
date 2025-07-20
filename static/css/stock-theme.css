@@ -1,8 +1,32 @@
 /* stock-theme.css - Custom Bootstrap Theme for Stock Market Apps */
+/* Hide scrollbar for all elements */
 body, html {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
+  overflow: hidden;
+}
+
+/* Optional: Ensure full width/height is used */
+body {
+  height: 100vh;
+  width: 100vw;
+}
+
+
+.card {
+  background-color: rgba(0, 0, 0, 0.85);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+.card {
+    background-color: #1b0202e8;
+    color: #ffffff;
+    border: 1px solid #aa2727;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
 }
 
 .dashboard-card {
@@ -21,21 +45,9 @@ body, html {
   background-size: cover;
 }
 
-.card {
-  background-color: rgba(0, 0, 0, 0.85);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-}
 
 
-/* 
-body {
-    background-color: #0b0f1a;
-    color: #f1f1f1;
-    font-family: 'Segoe UI', sans-serif;
-    overflow-x: hidden;
-    margin: 0;
-    padding: 0;
-} */
+
 
 
 /* General Navbar Container */
@@ -109,17 +121,48 @@ body {
     color: #a0a0a0;
 }
 
-.card {
-    background-color: #141d33;
-    color: #ffffff;
-    border: 1px solid #2c3e50;
-    margin-bottom: 20px;
-    border-radius: 8px;
+
+
+.table-container {
+  max-height: 700px;  /* adjust height as needed */
+  overflow-y: auto;
+  border: 1px solid #444;
 }
 
-.card-title {
-    font-size: 1.2rem;
-    font-weight: 700;
+.fixed-header thead th {
+  position: sticky;
+  top: 0;
+  background-color: #1e1e1e; /* match table bg */
+  z-index: 2;
+  color: #fff;
+  border-bottom: 2px solid #666;
+}
+
+.fixed-header thead th {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+
+/* Style the scrollbar track */
+.table-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #1e1e1e;  /* Dark track background */
+  border-radius: 10px;
+}
+
+/* Style the scrollbar thumb */
+.table-container::-webkit-scrollbar-thumb {
+  background-color: #555;   /* Darker thumb */
+  border-radius: 20px;
+  border: px solid #1e1e1e;  /* Inner border to blend with track */
+}
+
+/* On hover */
+.table-container::-webkit-scrollbar-thumb:hover {
+  background-color: #888;
 }
 
 .table {
@@ -140,7 +183,7 @@ body {
 
 .table td,
 .table th {
-    padding: 12px;
+    padding: 8px;
 }
 
 .btn {
