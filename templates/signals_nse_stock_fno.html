@@ -27,8 +27,8 @@
 
         <!-- 🔍 Search -->
         <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search instrument symbol...">
-
-        <table class="table table-dark table-striped table-bordered" id="signalsTable">
+        <div class="table-container mt-4">
+        <table class="table table-dark table-striped table-bordered fixed-header" id="signalsTable">
             <thead>
                 <tr>
                     <th>Symbol</th>
@@ -68,7 +68,7 @@
                 {% endif %}
             </tbody>
         </table>
-
+        </div>
         <p class="text-muted small mt-3">Page auto-refreshes every 15 seconds.</p>
     </div>
 

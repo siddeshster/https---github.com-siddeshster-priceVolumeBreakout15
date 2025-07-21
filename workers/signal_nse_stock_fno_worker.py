@@ -135,7 +135,7 @@ def background_signal_job():
         print("❌ No instruments found. Exiting.")
         return
 
-    print("🚀 Running signal worker in 10-minute test mode...")
+    print("🚀 Running signal worker in 15-minute test mode...")
 
     while True:
         now = datetime.now()
@@ -151,7 +151,7 @@ def background_signal_job():
                     print("📎 Available symbols in map:", list(symbol_token_map2.keys())[:5])
                     continue
 
-                from_date = now.replace(hour=9, minute=25, second=0, microsecond=0)
+                from_date = now.replace(hour=9, minute=15, second=0, microsecond=0)
                 to_date = now
 
                 try:
@@ -228,5 +228,6 @@ def send_telegram_alert(symbol, signal_type, price, time,volume_delta):
             print(f"❌ Telegram send failed: {response.text}")
     except Exception as e:
         print(f"❌ Telegram error: {e}")
+
 if __name__ == "__main__":
     background_signal_job()

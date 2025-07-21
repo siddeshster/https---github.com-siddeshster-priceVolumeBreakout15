@@ -17,8 +17,6 @@ with open('Config/instrument_config.json') as j:
 nse_stock_interval = config['nse_stocks']['interval']
 
 
-interval =config
-
 kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
 
@@ -125,7 +123,7 @@ def store_signal_in_db(result):
 
 def is_market_time(now):
     start = now.replace(hour=9, minute=15, second=0, microsecond=0)
-    end = now.replace(hour=3, minute=0, second=0, microsecond=0)
+    end = now.replace(hour=15, minute=0, second=0, microsecond=0)
     return start <= now <= end
 
 
@@ -135,7 +133,7 @@ def background_signal_job():
         print("❌ No instruments found. Exiting.")
         return
 
-    print("🚀 Running signal worker in 3-minute test mode...")
+    print("🚀 Running signal worker in 15-minute test mode...")
 
     while True:
         now = datetime.now()
@@ -151,7 +149,7 @@ def background_signal_job():
                     print("📎 Available symbols in map:", list(symbol_token_map2.keys())[:5])
                     continue
 
-                from_date = now.replace(hour=9, minute=25, second=0, microsecond=0)
+                from_date = now.replace(hour=9, minute=15, second=0, microsecond=0)
                 to_date = now
 
                 try:
