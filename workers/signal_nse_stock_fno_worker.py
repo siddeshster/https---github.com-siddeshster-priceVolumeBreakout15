@@ -11,11 +11,12 @@ with open('Config/config.json') as f:
     config = json.load(f)
 api_key = config['api_key']
 access_token = config['access_token']
-
+telegram_bot_token= config.get("telegram_bot_token")
+telegram_chat_id = config.get("telegram_chat_id")
 
 with open('Config/instrument_config.json') as j:
-    config = json.load(j)
-nse_fno_interval = config['nse_fno']['interval']
+    instr_config = json.load(j)
+nse_fno_interval = instr_config['nse_fno']['interval']
 
 
 
@@ -206,17 +207,24 @@ def background_signal_job():
                     print(f"❌ Error with {symbol}: {e}")
 
         time.sleep(60)  # 🔁 run every minute
-
-def send_telegram_alert(symbol, signal_type, price, time,volume_delta):
+def send_telegram_alert(symbol, signal_type, price, time, volume_delta):
     try:
-        bot_token = config["telegram_bot_token"]
-        chat_id = config["telegram_chat_id"]
+        # bot_token = config.get("telegram_bot_token")
+        # chat_id = config.get("telegram_chat_id")
 
-        text = f"📡 *{signal_type}* signal on *{symbol}*\nPrice: ₹{price}\nTime: {time}\nVolume%:{volume_delta}%"
-        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        if not telegram_bot_token or not telegram_chat_id:
+            raise ValueError("Missing Telegram config keys")
 
+        text = (
+            f"📡 *{signal_type}* signal on *{symbol}*\n"
+            f"Price: ₹{price}\n"
+            f"Time: {time}\n"
+            f"Volume%: {volume_delta}%"
+        )
+
+        url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
         payload = {
-            "chat_id": chat_id,
+            "chat_id": telegram_chat_id,
             "text": text,
             "parse_mode": "Markdown"
         }
@@ -228,6 +236,6 @@ def send_telegram_alert(symbol, signal_type, price, time,volume_delta):
             print(f"❌ Telegram send failed: {response.text}")
     except Exception as e:
         print(f"❌ Telegram error: {e}")
-
+        
 if __name__ == "__main__":
     background_signal_job()

@@ -7,10 +7,10 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 import sqlite3
-from workers.signal_worker import send_telegram_alert
-from workers.signal_nse_stock_fno_worker import send_telegram_alert
-from workers.signal_nse_stock_worker import send_telegram_alert
-from workers.signal_worker import send_telegram_alert
+# from workers.signal_worker import send_telegram_alert
+# from workers.signal_nse_stock_fno_worker import send_telegram_alert
+# from workers.signal_nse_stock_worker import send_telegram_alert
+# from workers.signal_worker import send_telegram_alert
 
 from auth_utils import verify_user, get_user_roles,update_session_status
 

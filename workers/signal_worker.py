@@ -12,13 +12,15 @@ with open('Config/config.json') as f:
 
 api_key = config['api_key']
 access_token = config['access_token']
+telegram_bot_token= config.get("telegram_bot_token")
+telegram_chat_id = config.get("telegram_chat_id")
 
 kite = KiteConnect(api_key=api_key)
 kite.set_access_token(access_token)
 
 with open('Config/instrument_config.json') as j:
-    config = json.load(j)
-mcx_interval = config['mcx_fno']['interval']
+    instr_config = json.load(j)
+mcx_interval = instr_config['mcx_fno']['interval']
 # mcx_volume_threshold = config['mcx_fno']['volume_threshold']
 
 DB_PATH = 'signals.db'
@@ -204,6 +206,7 @@ def background_signal_job():
                             signal_count += 1
 
                     print(f"✅ {symbol}: {signal_count} signal(s) inserted.")
+                    
 
                 except Exception as e:
                     print(f"❌ Error with {symbol}: {e}")
@@ -212,10 +215,10 @@ def background_signal_job():
 
 def send_telegram_alert(symbol, signal_type, price, time, volume_delta):
     try:
-        bot_token = config.get("telegram_bot_token")
-        chat_id = config.get("telegram_chat_id")
+        # bot_token = config.get("telegram_bot_token")
+        # chat_id = config.get("telegram_chat_id")
 
-        if not bot_token or not chat_id:
+        if not telegram_bot_token or not telegram_chat_id:
             raise ValueError("Missing Telegram config keys")
 
         text = (
@@ -225,9 +228,9 @@ def send_telegram_alert(symbol, signal_type, price, time, volume_delta):
             f"Volume%: {volume_delta}%"
         )
 
-        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
         payload = {
-            "chat_id": chat_id,
+            "chat_id": telegram_chat_id,
             "text": text,
             "parse_mode": "Markdown"
         }

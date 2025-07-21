@@ -1,8 +1,8 @@
 from werkzeug.security import generate_password_hash
 import sqlite3
 
-username = "vedant"
-password = "admin@123"  # plain text
+username = "VINITA"
+password = "Paswd#123"  # plain text
 hash_pw = generate_password_hash(password)
 
 conn = sqlite3.connect("signals.db")
