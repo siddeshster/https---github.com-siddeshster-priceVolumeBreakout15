@@ -112,7 +112,8 @@
             <th>LOW</th>
           </tr>
         </thead>
-        <tbody>
+        <!-- <tbody id="liveTableBody"> -->
+                  <tbody id>
           {% for row in data %}
           <tr
             class="{% if row.signal == 'BULLISH' %}table-success{% elif row.signal == 'BEARISH' %}table-danger{% endif %}">
@@ -164,19 +165,19 @@
         themeSwitch.checked = true;
       }
 
-      if (document.getElementById("autoRefreshSwitch").checked) {
+      if (document.getElementById("autoRefreshToggle").checked) {
         startAutoRefresh();
       }
     };
 
-    let refreshTimer;
+    // let refreshTimer;
     function startAutoRefresh() {
       refreshTimer = setInterval(() => {
         const form = document.querySelector("form");
         if (form) {
           form.submit(); // uses current session context
         }
-      }, 10000); // 10 seconds
+      }, 10000); // 1 seconds
     }
 
     function stopAutoRefresh() {
@@ -184,7 +185,7 @@
     }
 
     function toggleRefresh() {
-      const isChecked = document.getElementById("autoRefreshSwitch").checked;
+      const isChecked = document.getElementById("autoRefreshToggle").checked;
       if (isChecked) {
         startAutoRefresh();
       } else {
@@ -194,7 +195,7 @@
 
     // ✅ Wait until page is ready
     document.addEventListener("DOMContentLoaded", () => {
-      const isChecked = document.getElementById("autoRefreshSwitch").checked;
+      const isChecked = document.getElementById("autoRefreshToggle").checked;
       if (isChecked) startAutoRefresh();
     });
 
@@ -208,31 +209,6 @@
       document.body.classList.toggle('text-dark');
     });
   </script>
-
-  <!-- <script>
-document.getElementById('testTelegramBtn').addEventListener('click', () => {
-    const statusDiv = document.getElementById('telegramStatus');
-    statusDiv.innerText = '⏳ Sending alert...';
-
-    fetch('/test-telegram', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error("Network error");
-        return response.json();
-    })
-    .then(data => {
-        statusDiv.innerText = data.message;
-    })
-    .catch(err => {
-        console.error('Telegram error:', err);
-        statusDiv.innerText = '❌ Failed to send alert.';
-    });
-});
-</script> -->
   <div class="background-image"></div>
 </body>
 

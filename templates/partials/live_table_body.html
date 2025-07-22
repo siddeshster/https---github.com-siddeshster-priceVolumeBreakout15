@@ -1,0 +1,19 @@
+<tbody>
+  {% for row in data %}
+  <tr class="{% if row.signal == 'BULLISH' %}table-success{% elif row.signal == 'BEARISH' %}table-danger{% endif %}">
+    <td>{{ row.date[:16].split(' ')[1] }}</td>
+    <td class="{% if row.signal == 'BULLISH' %}text-bullish{% elif row.signal == 'BEARISH' %}text-bearish{% endif %}">
+      {{ row.signal }}
+    </td>
+    <td class="{% if row.signal2 == 'BULLISH' %}text-success{% elif row.signal2 == 'BEARISH' %}text-danger{% endif %}">
+      {{ row.signal2 }}
+    </td>
+    <td>{{ row.volume }}</td>
+    <td>{{ row['volume_change_%']|round(2) }}</td>
+    <td>{{ row.close }}</td>
+    <td>{{ row.open }}</td>
+    <td>{{ row.high }}</td>
+    <td>{{ row.low }}</td>
+  </tr>
+  {% endfor %}
+</tbody>

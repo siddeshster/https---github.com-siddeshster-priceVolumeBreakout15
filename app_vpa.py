@@ -378,6 +378,18 @@ def signal_table_partial_nse_stock():
 #     return jsonify({"message": "✅ Test Telegram Alert Sent"})
 
 
+# @app.route('/live-data', methods=['POST'])
+# def live_data():
+#     instrument = request.form.get('instrument')
+#     date = request.form.get('date')
+#     interval = request.form.get('interval')
+#     volume_breakout = float(request.form.get('volume_breakout', 0))
+
+#     # Fetch your latest signal data
+#     data = get_current_day_data(instrument, date, interval, volume_breakout)
+
+#     return render_template('partials/live_table_body.html', data=data)
+
 
 
 if __name__ == "__main__":
