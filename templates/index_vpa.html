@@ -97,8 +97,8 @@
     {% endif %}
 
     {% if data %}
-<div class="table-container mt-4">
-  <table class="table table-dark table-striped table-bordered fixed-header">
+    <div class="table-container mt-4">
+      <table class="table table-dark table-striped table-bordered fixed-header">
         <thead>
           <tr>
             <th>TIME</th>
@@ -113,7 +113,7 @@
           </tr>
         </thead>
         <!-- <tbody id="liveTableBody"> -->
-                  <tbody id>
+        <tbody id>
           {% for row in data %}
           <tr
             class="{% if row.signal == 'BULLISH' %}table-success{% elif row.signal == 'BEARISH' %}table-danger{% endif %}">
@@ -141,43 +141,21 @@
   </div>
 
   <script>
-    function toggleTheme() {
-      const body = document.getElementById("themeBody");
-      const isLight = body.classList.contains("theme-light");
-      if (isLight) {
-        body.classList.remove("theme-light");
-        body.classList.add("theme-dark");
-        localStorage.setItem("theme", "dark");
-      } else {
-        body.classList.remove("theme-dark");
-        body.classList.add("theme-light");
-        localStorage.setItem("theme", "light");
-      }
+
+
+    if (document.getElementById("autoRefreshToggle").unchecked) {
+      startAutoRefresh();
     }
 
-    window.onload = () => {
-      const theme = localStorage.getItem("theme") || "dark";
-      const body = document.getElementById("themeBody");
-      const themeSwitch = document.getElementById("themeSwitch");
-      if (theme === "light") {
-        body.classList.remove("theme-dark");
-        body.classList.add("theme-light");
-        themeSwitch.checked = true;
-      }
 
-      if (document.getElementById("autoRefreshToggle").checked) {
-        startAutoRefresh();
-      }
-    };
-
-    // let refreshTimer;
+    let refreshTimer;
     function startAutoRefresh() {
       refreshTimer = setInterval(() => {
         const form = document.querySelector("form");
         if (form) {
           form.submit(); // uses current session context
         }
-      }, 10000); // 1 seconds
+      }, 60000); // 1 seconds
     }
 
     function stopAutoRefresh() {
@@ -193,21 +171,6 @@
       }
     }
 
-    // ✅ Wait until page is ready
-    document.addEventListener("DOMContentLoaded", () => {
-      const isChecked = document.getElementById("autoRefreshToggle").checked;
-      if (isChecked) startAutoRefresh();
-    });
-
-
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    document.getElementById('lightModeToggle').addEventListener('change', function () {
-      document.body.classList.toggle('bg-light');
-      document.body.classList.toggle('text-dark');
-    });
   </script>
   <div class="background-image"></div>
 </body>
