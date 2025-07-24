@@ -410,13 +410,50 @@ def get_nse_ltp():
     if not token:
         return jsonify({'error': 'Invalid symbol'}), 400
     try:
-        ltp_data = kite.ltp([f'NFO:{symbol}'])
-        ltp = ltp_data.get(f'NFO:{symbol}', {}).get('last_price')
+        ltp_data = kite.ltp([f'NSE:{symbol}'])
+        ltp = ltp_data.get(f'NSE:{symbol}', {}).get('last_price')
         if ltp is None:
             return jsonify({'error': 'No LTP found'}), 404
         return jsonify({'ltp': ltp})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# New method for Nifty 50 and BankNifty LTP
+@app.route('/get_index_ltp', methods=['GET'])
+def get_index_ltp():
+    """
+    Fetches the Last Traded Price (LTP) for Nifty 50 or BankNifty.
+    Requires 'index' as a query parameter (e.g., 'NIFTY 50', 'BANKNIFTY').
+    """
+    index_name = request.args.get('index')
+    if not index_name:
+        return jsonify({'error': 'No index name provided. Use "NIFTY 50" or "BANKNIFTY"'}), 400
+
+    # Standard symbols for Nifty 50 and BankNifty on NSE
+    index_symbols = {
+        'NIFTY 50': 'NSE:NIFTY 50',
+        'BANKNIFTY': 'NSE:NIFTY BANK'
+    }
+
+    # Normalize input and get the correct KiteConnect symbol
+    kite_symbol = index_symbols.get(index_name.upper())
+
+    if not kite_symbol:
+        return jsonify({'error': f'Invalid index name: {index_name}. Supported indices are "NIFTY 50" and "BANKNIFTY"'}), 400
+
+    try:
+        # Fetch LTP for the specified index
+        ltp_data = kite.ltp([kite_symbol])
+        ltp = ltp_data.get(kite_symbol, {}).get('last_price')
+
+        if ltp is None:
+            return jsonify({'error': f'No LTP found for {index_name}'}), 404
+        return jsonify({'ltp': ltp})
+    except Exception as e:
+        # Log the full exception for debugging in a real application
+        # app.logger.error(f"Error fetching LTP for {index_name}: {e}")
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
