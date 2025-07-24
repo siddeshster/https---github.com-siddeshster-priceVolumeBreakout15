@@ -2,7 +2,7 @@ from kiteconnect import KiteConnect
 
 def tokengen():
     kite = KiteConnect(api_key="4v210llwkbl8uimi")
-    data = kite.generate_session("5H1bvZVHSE1o7fIUS8mD7Vn0DVNmATvN", api_secret="4kiy063fs1q543s86sj3vveqp2j8xobh")
+    data = kite.generate_session("CbkTEjF9boyCuDnMDNvKmK607N0T9nNz", api_secret="4kiy063fs1q543s86sj3vveqp2j8xobh")
     access_token = data["access_token"]
 
     print("Access Token:", access_token)

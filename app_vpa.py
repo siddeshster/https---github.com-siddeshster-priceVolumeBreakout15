@@ -7,10 +7,6 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 import sqlite3
-# from workers.signal_worker import send_telegram_alert
-# from workers.signal_nse_stock_fno_worker import send_telegram_alert
-# from workers.signal_nse_stock_worker import send_telegram_alert
-# from workers.signal_worker import send_telegram_alert
 
 from auth_utils import verify_user, get_user_roles,update_session_status
 
@@ -58,6 +54,10 @@ kite.set_access_token(access_token)
 # Load instrument list from CSV
 instruments_df = pd.read_csv("InstrumentsData/instruments_short.csv")
 instrument_map = dict(zip(instruments_df['tradingsymbol'], instruments_df['instrument_token']))
+
+# Load instrument list from CSV
+instruments_options_df = pd.read_csv("InstrumentsData/options.csv")
+instruments_options_map = dict(zip(instruments_options_df['tradingsymbol'], instruments_options_df['instrument_token']))
 
 def get_current_day_data(token, interval, threshold, date_str, sort_order):
     day = datetime.strptime(date_str, "%Y-%m-%d")
@@ -140,6 +140,43 @@ def login_required(role=None):
     return wrapper
 
 
+@app.route('/vpa_options_analysis', methods=['GET', 'POST'])
+@login_required()
+def vpa_options_analysis():
+    if 'username' not in session:  # ✅ match the session key used at login
+        return redirect(url_for('login'))
+
+    today = datetime.now().date()
+    results = []
+    no_data = False
+
+    if request.method == 'POST':
+        trading_symbol = request.form['instrument']
+        instrument_token = instruments_options_map.get(trading_symbol)
+        date = request.form['date']
+        interval = request.form['interval']
+        volume_threshold = float(request.form['volume_breakout'])
+        sort_order = 'asc' if 'sortSwitch' in request.form else 'desc'
+
+        df = get_current_day_data(instrument_token, interval, volume_threshold, date, sort_order)
+
+        return render_template("vpa_options.html", instruments_options_map=instruments_options_map,
+                               symbol=trading_symbol,
+                               date=date,
+                               interval=interval,
+                               volume_threshold=volume_threshold,
+                               sort_order=sort_order,
+                               data=df.to_dict(orient='records'),
+                               no_data=df.empty)
+
+    return render_template("vpa_options.html",
+                           instruments_options_map=instruments_options_map,
+                           data=[],
+                           no_data=False,
+                           sort_order='desc',
+                           date=today.strftime('%Y-%m-%d'))
+
+
 @app.route('/vpa_analysis', methods=['GET', 'POST'])
 @login_required()
 def index():
@@ -209,8 +246,6 @@ def login():
     return render_template("login.html",datetime=datetime)
 
 
-
-
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
@@ -238,25 +273,6 @@ def logout():
     session.clear()
     flash("🔓 Logged out successfully", "info")
     return redirect(url_for("login"))
-# @app.route('/logout')
-# def logout():
-#     username = session.get('username')
-#     if username:
-#         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-#         conn = sqlite3.connect('signals.db')
-#         c = conn.cursor()
-#         c.execute("""
-#             UPDATE USERS_SESSION SET logout_time = ?, LOGIN_status = 'LOGGED_OUT'
-#             WHERE username = ?
-#         """, (now, username))
-#         conn.commit()
-#         conn.close()
-
-#         print(f"🚪 User {username} logged out at {now}")
-
-#     session.clear()
-#     flash("Logged out successfully.", "success")
-#     return redirect(url_for('login'))
 
 
 @app.before_request
@@ -368,68 +384,39 @@ def signal_table_partial_nse_stock():
 
     return render_template("partials/signal_rows_nse_stocks.html", signals=rows)
 
-# ---------------------------------------------------------------------------
-
-# @app.route("/test-telegram", methods=["POST"])
-# def test_telegram():
-
-#     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-#     send_telegram_alert("TESTSYM", "BULLISH", 123.45, now_str)
-#     return jsonify({"message": "✅ Test Telegram Alert Sent"})
-
-
-# @app.route('/live-data', methods=['POST'])
-# def live_data():
-#     instrument = request.form.get('instrument')
-#     date = request.form.get('date')
-#     interval = request.form.get('interval')
-#     volume_breakout = float(request.form.get('volume_breakout', 0))
-
-#     # Fetch your latest signal data
-#     data = get_current_day_data(instrument, date, interval, volume_breakout)
-
-#     return render_template('partials/live_table_body.html', data=data)
-
-
+@app.route('/get_option_ltp', methods=['GET'])
+def get_option_ltp():
+    symbol = request.args.get('symbol')
+    if not symbol:
+        return jsonify({'error': 'No symbol provided'}), 400
+    token = instruments_options_map.get(symbol)
+    if not token:
+        return jsonify({'error': 'Invalid symbol'}), 400
+    try:
+        ltp_data = kite.ltp([f'NFO:{symbol}'])
+        ltp = ltp_data.get(f'NFO:{symbol}', {}).get('last_price')
+        if ltp is None:
+            return jsonify({'error': 'No LTP found'}), 404
+        return jsonify({'ltp': ltp})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/get_nse_ltp', methods=['GET'])
+def get_nse_ltp():
+    symbol = request.args.get('symbol')
+    if not symbol:
+        return jsonify({'error': 'No symbol provided'}), 400
+    token = instrument_map.get(symbol)
+    if not token:
+        return jsonify({'error': 'Invalid symbol'}), 400
+    try:
+        ltp_data = kite.ltp([f'NFO:{symbol}'])
+        ltp = ltp_data.get(f'NFO:{symbol}', {}).get('last_price')
+        if ltp is None:
+            return jsonify({'error': 'No LTP found'}), 404
+        return jsonify({'ltp': ltp})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-
-# def login():
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-
-#         if verify_user(username, password):
-#             conn = sqlite3.connect('signals.db')
-#             cursor = conn.cursor()
-#             cursor.execute("SELECT status, validfrom, validto FROM USERS WHERE username = ?", (username,))
-#             user = cursor.fetchone()
-#             conn.close()
-
-#             if user:
-#                 status, validfrom, validto = user
-#                 today = datetime.today().date()
-#                 # if status == 'ACTIVE' and validfrom <= str(today) <= validto:
-#                 if status == 'ACTIVE':
-#                     session['username'] = username
-#                     session['roles'] = get_user_roles(username)
-#                     return redirect(url_for('dashboard'))
-
-#                 else:
-#                     flash("⚠️ User access expired or inactive.", "danger")
-#             else:
-#                 flash("❌ User not found.", "danger")
-#         else:
-#             flash("❌ Invalid credentials", "danger")
-
-#     return render_template("login.html",datetime=datetime)
-
-
-# @app.route('/logout', methods=['POST'])
-# def logout():
-#     session.clear()
-#     return redirect(url_for('login'))  # or index/homepage

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Live Analysis</title>
+  <title>Live Options Analysis</title>
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Custom Stock Market Theme -->
@@ -25,7 +25,7 @@
   <div class="container mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-3 text-white">
-      <h3>📡 Live Analysis</h3>
+      <h3>📡 Live Options Analysis</h3>
       <div class="dropdown text-white">
         <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
           ⚙️ Options
@@ -53,7 +53,7 @@
         <input class="form-control form-control-sm" list="instrumentList" name="instrument" required
           value="{{ symbol or '' }}">
         <datalist id="instrumentList">
-          {% for name, token in instrument_map.items() %}
+          {% for name, token in instruments_options_map.items() %}
           <option value="{{ name }}">{{ name }} ({{ token }})</option>
           {% endfor %}
         </datalist>
@@ -86,10 +86,11 @@
       <div class="col-auto d-flex align-items-end">
         <button type="submit" class="btn btn-primary">SUBMIT </button>
       </div>
-
-            <div class="col-auto">
+      <div class="col-auto">
         <span id="livePrice" class="btn btn-primary" style="min-width:120px;display:inline-block;"></span> 
       </div>
+           
+
     </form>
 
 
@@ -158,7 +159,8 @@
         if (form) {
           form.submit(); // uses current session context
         }
-      }, 60000); // 1 seconds
+      }, 2000);
+       // 1 seconds
     }
 
     function stopAutoRefresh() {
@@ -174,7 +176,7 @@
       }
     }
 
-    // Live Price Fetcher
+ // Live Price Fetcher
     const instrumentInput = document.querySelector('input[list="instrumentList"]');
     const livePriceSpan = document.getElementById('livePrice');
     let livePriceTimer;
@@ -184,7 +186,7 @@
         livePriceSpan.textContent = '';
         return;
       }
-      fetch(`/get_nse_ltp?symbol=${encodeURIComponent(symbol)}`)
+      fetch(`/get_option_ltp?symbol=${encodeURIComponent(symbol)}`)
         .then(res => res.json())
         .then(data => {
           if (data.ltp !== undefined) {
@@ -208,6 +210,7 @@
 
     instrumentInput.addEventListener('input', startLivePriceUpdates);
     document.addEventListener('DOMContentLoaded', startLivePriceUpdates);
+
   </script>
   <div class="background-image"></div>
 </body>

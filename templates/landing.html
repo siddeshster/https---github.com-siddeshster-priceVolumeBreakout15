@@ -65,12 +65,21 @@
         <div class="col-md-4">
           <a href="/vpa_analysis" class="card h-100 bg-dark border-primary text-decoration-none dashboard-card">
             <div class="card-body">
-              <h5 class="card-title text-primary">VPA Analysis Dashboard</h5>
-              <p class="card-text text-light">Live price-volume analysis.</p>
+              <h5 class="card-title text-primary">VPA Stocks and Futures Analysis</h5>
+              <p class="card-text text-light">Live Price-Volume Stocks and Futures analysis.</p>
             </div>
           </a>
         </div>
 
+        <!-- VPA Options Analysis -->
+        <div class="col-md-4">
+          <a href="/vpa_options_analysis" class="card h-100 bg-dark border-primary text-decoration-none dashboard-card">
+            <div class="card-body">
+              <h5 class="card-title text-primary">VPA Index Options Analysis</h5>
+              <p class="card-text text-light">Live Price-Volume Options analysis.</p>
+            </div>
+          </a>
+        </div>
 
         <!-- Admin Dashboard (Only for Admin) -->
         {% if session['user_type'] == 'ADMIN' %}
