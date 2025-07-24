@@ -1,6 +1,6 @@
 {
-  "quantity": 100,
+  "quantity": 1,
   "order_type": "MARKET",
-  "sl_percent": 0.2,
-  "target_percent": 0.2
+  "sl_percent": 0.5,
+  "target_percent": 0.5
 }

@@ -1,0 +1,2 @@
+﻿instrument_token,exchange_token,tradingsymbol,name,last_price,expiry,strike,tick_size,lot_size,instrument_type,segment,exchange
+115234567,450135,CRUDEOILM25AUGFUT,CRUDEOILM,0,8/19/2025,0,1,1,FUT,MCX-FUT,MCX

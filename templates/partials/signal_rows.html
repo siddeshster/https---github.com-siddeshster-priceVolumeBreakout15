@@ -6,7 +6,7 @@
             {{ row.signal_type }}
         </strong>
     </td>
-    <td>{{ row.signal_time[:16] }}</td>
+    <td>{{ row.signal_time }}</td> {# Removed [:16] to display full time with timezone #}
     <td>{{ "%.2f"|format(row.open) }}</td>
     <td>{{ "%.2f"|format(row.high) }}</td>
     <td>{{ "%.2f"|format(row.low) }}</td>

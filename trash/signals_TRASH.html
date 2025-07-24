@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Live MCX FNO Signal Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/stock-theme.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg  px-10">
+        <a class="navbar-brand fw-bold" href="/dashboard">嶋 VPA Trading System</a>
+        <div class="ms-auto">
+            <a href="/logout" class="btn btn-danger">Logout</a>
+        </div>
+    </nav>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 text-white">
+            <h3>藤 Live MCX FNO Signal Dashboard</h3>
+        </div>
+
+        <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search instrument symbol...">
+        
+        <div class="table-container mt-4">
+        <table class="table table-dark table-striped table-bordered fixed-header" id="signalsTable">
+
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Signal</th>
+                    <th>Time</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>Low</th>
+                    <th>Close</th>
+                    <th>Volume</th>
+                    <th>Volume %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if signals %}
+                {% for row in signals %}
+                <tr>
+                    <td>{{ row.symbol }}</td>
+                    <td>
+                        <strong style="color: {{ 'lime' if row.signal_type == 'BULLISH' else 'red' }}">
+                            {{ row.signal_type }}
+                        </strong>
+                    </td>
+                    <td>{{ row.signal_time }}</td> {# Removed [:16] to display full time with timezone #}
+                    <td>{{ "%.2f"|format(row.open) }}</td>
+                    <td>{{ "%.2f"|format(row.high) }}</td>
+                    <td>{{ "%.2f"|format(row.low) }}</td>
+                    <td>{{ "%.2f"|format(row.close) }}</td>
+                    <td>{{ "%.0f"|format(row.volume) }}</td>
+                    <td>{{ "%.2f"|format(row.volume_delta) }}%</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center">No signals available for today.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        </div>  
+        <p class="text-muted small mt-3">Page auto-refreshes every 15 seconds.</p>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+
+        function filterRows() {
+            const filter = searchInput.value.toUpperCase();
+            const rows = document.querySelectorAll("#signalsTable tbody tr");
+            rows.forEach(row => {
+                const symbol = row.cells[0].textContent.toUpperCase();
+                row.style.display = symbol.includes(filter) ? '' : 'none';
+            });
+        }
+
+        searchInput.addEventListener('keyup', filterRows);
+
+        function refreshTable() {
+            fetch("/signals/table")
+                .then(response => response.text())
+                .then(html => {
+                    document.querySelector("#signalsTable tbody").innerHTML = html;
+                    filterRows();  // Apply search filter again after reload
+                })
+                .catch(error => console.error("Failed to reload table:", error));
+        }
+
+        setInterval(refreshTable, 15000);  // Refresh every 15 seconds
+
+// Live Price Fetcher
+    const instrumentInput = document.querySelector('input[list="instrumentList"]');
+    const livePriceSpan = document.getElementById('livePrice');
+    let livePriceTimer;
+
+    function fetchLivePrice(symbol) {
+      if (!symbol) {
+        livePriceSpan.textContent = '';
+        return;
+      }
+      fetch('/get_option_ltp?symbol=${encodeURIComponent(symbol)}')
+        .then(res => res.json())
+        .then(data => {
+          if (data.ltp !== undefined) {
+            livePriceSpan.textContent = `Live Price: ₹${data.ltp}`;
+          } else {
+            livePriceSpan.textContent = 'No live price';
+          }
+        })
+        .catch(() => {
+          livePriceSpan.textContent = 'Error fetching price';
+        });
+    }
+
+    function startLivePriceUpdates() {
+      if (livePriceTimer) clearInterval(livePriceTimer);
+      const symbol = instrumentInput.value;
+      fetchLivePrice(symbol);
+      livePriceTimer = setInterval(() => fetchLivePrice(instrumentInput.value), 5000);
+    }
+
+    instrumentInput.addEventListener('input', startLivePriceUpdates);
+    document.addEventListener('DOMContentLoaded', startLivePriceUpdates);
+
+
+
+    </script>
+
+
+        <div class="background-image"></div>
+</body>
+
+</html>

@@ -1,6 +1,7 @@
 
 from flask import Flask, render_template, request, redirect, session, url_for, flash, jsonify 
-
+import pytz
+import re
 from kiteconnect import KiteConnect
 import json
 import pandas as pd
@@ -16,7 +17,8 @@ from admin_routes import admin_dashboard, admin_bp
 import logging
 from logging.handlers import RotatingFileHandler
 import os
-
+IST_TIMEZONE = pytz.timezone('Asia/Kolkata')
+DB_PATH = 'signals.db'
 # Create logs directory if not exists
 if not os.path.exists('logs'):
     os.makedirs('logs')
@@ -313,6 +315,117 @@ def signal_table_partial_mcx():
     conn.close()
 
     return render_template("partials/signal_rows.html", signals=rows)
+
+# # Helper function to get DB connection
+# def get_db_connection():
+#     conn = sqlite3.connect(DB_PATH)
+#     conn.row_factory = sqlite3.Row
+#     return conn
+
+# @app.route("/signals")
+# @login_required("MCX_FNO")
+# def view_signals():
+#     conn = get_db_connection()
+
+#     # Get the current time in IST
+#     now_ist = datetime.now(IST_TIMEZONE)
+
+#     # Determine the start of the current trading day in IST (e.g., 9:00 AM)
+#     # This ensures we capture signals for the current market session.
+#     # If the current time is before 9 AM, we want signals from yesterday's market open.
+#     # Otherwise, we want signals from today's market open.
+#     market_open_hour = 9
+#     # market_close_hour = 23 # Assuming market closes at 11 PM IST (Not strictly needed for 'from' date logic)
+
+#     # Calculate the start of the "current trading session" in IST
+#     if now_ist.hour < market_open_hour: # If it's before 9 AM IST today
+#         # Consider the trading session to have started yesterday at 9 AM IST
+#         start_of_current_trading_session_ist = now_ist.replace(hour=market_open_hour, minute=0, second=0, microsecond=0) - timedelta(days=1)
+#     else:
+#         # Consider the trading session to have started today at 9 AM IST
+#         start_of_current_trading_session_ist = now_ist.replace(hour=market_open_hour, minute=0, second=0, microsecond=0)
+
+#     # Convert this IST start time to UTC for querying the database
+#     start_of_current_trading_session_utc_str = start_of_current_trading_session_ist.astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+
+#     cursor = conn.cursor()
+#     cursor.execute("""
+#         SELECT * FROM signals
+#         WHERE signal_time >= ? -- Compare UTC strings directly
+#         ORDER BY signal_time DESC
+#     """, (start_of_current_trading_session_utc_str,))
+#     rows = cursor.fetchall()
+#     conn.close()
+
+#     # Convert UTC signal_time back to IST for display
+#     display_signals = []
+#     for row in rows:
+#         signal_time_utc_dt = datetime.strptime(row['signal_time'], "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.utc)
+#         signal_time_ist_dt = signal_time_utc_dt.astimezone(IST_TIMEZONE)
+
+#         # Create a new dictionary or object for the template to avoid modifying original row object
+#         display_signals.append({
+#             'symbol': row['symbol'],
+#             'signal_type': row['signal_type'],
+#             'signal_time': signal_time_ist_dt.strftime("%Y-%m-%d %H:%M:%S %Z"), # Format for display
+#             'open': row['open'],
+#             'high': row['high'],
+#             'low': row['low'],
+#             'close': row['close'],
+#             'volume': row['volume'],
+#             'volume_delta': row['volume_delta']
+#         })
+
+#     return render_template("signals.html", signals=display_signals)
+
+# @app.route("/signals/table")
+# def signal_table_partial_mcx():
+#     conn = get_db_connection()
+
+#     # Identical logic as in view_signals to ensure consistency
+#     now_ist = datetime.now(IST_TIMEZONE)
+#     market_open_hour = 9
+
+#     if now_ist.hour < market_open_hour:
+#         start_of_current_trading_session_ist = now_ist.replace(hour=market_open_hour, minute=0, second=0, microsecond=0) - timedelta(days=1)
+#     else:
+#         start_of_current_trading_session_ist = now_ist.replace(hour=market_open_hour, minute=0, second=0, microsecond=0)
+
+#     start_of_current_trading_session_utc_str = start_of_current_trading_session_ist.astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+
+#     cursor = conn.cursor()
+#     cursor.execute("""
+#         SELECT * FROM signals
+#         WHERE signal_time >= ?
+#         ORDER BY signal_time DESC
+#     """, (start_of_current_trading_session_utc_str,))
+#     rows = cursor.fetchall()
+#     conn.close()
+
+#     # Convert UTC signal_time back to IST for display in the partial
+#     display_signals = []
+#     for row in rows:
+#         signal_time_utc_dt = datetime.strptime(row['signal_time'], "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.utc)
+#         signal_time_ist_dt = signal_time_utc_dt.astimezone(IST_TIMEZONE)
+#         display_signals.append({
+#             'symbol': row['symbol'],
+#             'signal_type': row['signal_type'],
+#             'signal_time': signal_time_ist_dt.strftime("%Y-%m-%d %H:%M:%S %Z"),
+#             'open': row['open'],
+#             'high': row['high'],
+#             'low': row['low'],
+#             'close': row['close'],
+#             'volume': row['volume'],
+#             'volume_delta': row['volume_delta']
+#         })
+
+#     # Render a partial template for the rows
+#     # You'll need to create a file named `templates/partials/signal_rows.html`
+#     # This partial will only contain the <tbody> content.
+#     return render_template("partials/signal_rows.html", signals=display_signals)
+
+
+
 # ---------------------------------------------------------------------------
 @app.route("/signals_nse_stock_fno")
 @login_required("NSE_FNO")

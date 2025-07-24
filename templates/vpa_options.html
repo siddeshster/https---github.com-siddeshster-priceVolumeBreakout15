@@ -2,285 +2,295 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Live Options Analysis</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/stock-theme.css') }}" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live Options Analysis</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/stock-theme.css') }}" rel="stylesheet">
 </head>
 
 <body class="theme-dark" id="themeBody">
-    <div class="background-image"></div>
-    <nav class="navbar navbar-expand-lg px-10">
-        <a class="navbar-brand fw-bold" href="/dashboard">📈 VPA Trading System</a>
-        <div class="ms-auto">
-            <a href="/logout" class="btn btn-danger">Logout</a>
-        </div>
-    </nav>
+  <div class="background-image"></div>
+  <nav class="navbar navbar-expand-lg px-10">
+    <a class="navbar-brand fw-bold" href="/dashboard">📈 VPA Trading System</a>
+    <div class="ms-auto">
+      <a href="/logout" class="btn btn-danger">Logout</a>
+    </div>
+  </nav>
 
 
-    <div class="container mt-4">
+  <div class="container mt-4">
 
-        <div class="d-flex justify-content-between align-items-center mb-3 text-white">
-            <h3>📡 Live Options Analysis</h3>
-            <div class="dropdown text-white">
-                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    ⚙️ Options
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li class="px-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
-                            <label class="form-check-label" for="autoRefreshToggle">Auto Refresh</label>
-                        </div>
-                    </li>
-                    <li class="px-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="oldestTopToggle">
-                            <label class="form-check-label" for="oldestTopToggle">Oldest on Top</label>
-                        </div>
-                    </li>
-                </ul>
+    <div class="d-flex justify-content-between align-items-center mb-3 text-white">
+      <h3>📡 Live Options Analysis</h3>
+      <div class="dropdown text-white">
+        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          ⚙️ Options
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li class="px-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
+              <label class="form-check-label" for="autoRefreshToggle">Auto Refresh</label>
             </div>
-        </div>
-
-        <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap text-white">
-            <div class="col-auto">
-                <label class="form-label">INSTRUMENT</label>
-                <input class="form-control form-control-sm" list="instrumentList" name="instrument" required
-                    value="{{ symbol or '' }}">
-                <datalist id="instrumentList">
-                    {% for name, token in instruments_options_map.items() %}
-                    <option value="{{ name }}">{{ name }} ({{ token }})</option>
-                    {% endfor %}
-                </datalist>
+          </li>
+          <li class="px-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="oldestTopToggle">
+              <label class="form-check-label" for="oldestTopToggle">Oldest on Top</label>
             </div>
-
-            <div class="col-auto">
-                <label class="form-label">DATE</label>
-                <input type="date" name="date" class="form-control form-control-sm" required value="{{ date or '' }}">
-            </div>
-
-            <div class="col-auto">
-                <label class="form-label">INTERVAL</label>
-                <select name="interval" class="form-select form-select-sm">
-                    <option value="1minute" {% if interval=='1minute' %}selected{% endif %}>1 Min</option>
-                    <option value="3minute" {% if interval=='3minute' %}selected{% endif %}>3 Min</option>
-                    <option value="5minute" {% if interval=='5minute' %}selected{% endif %}>5 Min</option>
-                    <option value="10minute" {% if interval=='10minute' %}selected{% endif %}>10 Min</option>
-                    <option value="15minute" {% if interval=='15minute' %}selected{% endif %}>15 Min</option>
-                    <option value="30minute" {% if interval=='30minute' %}selected{% endif %}>30 Min</option>
-                    <option value="60minute" {% if interval=='60minute' %}selected{% endif %}>60 Min</option>
-                </select>
-            </div>
-
-            <div class="col-auto">
-                <label class="form-label">VOLUME BREAKOUT %</label>
-                <input type="number" step="0.1" name="volume_breakout" class="form-control form-control-sm" required
-                    value="{{ volume_threshold or 0 }}">
-            </div>
-
-            <div class="col-auto d-flex align-items-end">
-                <button type="submit" class="btn btn-primary">SUBMIT </button>
-            </div>
-            <div class="col-auto">
-                <span id="livePrice" class="btn btn-primary" style="min-width:120px;display:inline-block;"></span>
-            </div>
-                        <div class="col-auto">
-                <span id="nifty50LivePrice" class="btn btn-primary" style="min-width:120px;display:inline-block;"></span>
-            </div>
-                        <div class="col-auto">
-                <span id="bankNiftyLivePrice" class="btn btn-primary" style="min-width:120px;display:inline-block;"></span>
-            </div>
-
-        </form>
-
-
-        {% if no_data %}
-        <div class="alert alert-warning mt-3" role="alert">
-            ⚠️ No data available for selected date/token.
-        </div>
-        {% endif %}
-
-        {% if data %}
-        <div class="table-container mt-4">
-            <table class="table table-dark table-striped table-bordered fixed-header">
-                <thead>
-                    <tr>
-                        <th>TIME</th>
-                        <th class="momentum-col">VCP MNMX NG</th>
-                        <th class="momentum-col">VCP MNMX</th>
-                        <th>VOLUME</th>
-                        <th>VOLUME CHANGE %</th>
-                        <th>CLOSE</th>
-                        <th>OPEN</th>
-                        <th>HIGH</th>
-                        <th>LOW</th>
-                    </tr>
-                </thead>
-                <tbody id="liveTableBody">
-                    {% for row in data %}
-                    <tr
-                        class="{% if row.signal == 'BULLISH' %}table-success{% elif row.signal == 'BEARISH' %}table-danger{% endif %}">
-                        <td>{{ row.date[:16].split(' ')[1] }}</td>
-                        <td
-                            class="{% if row.signal == 'BULLISH' %}text-bullish{% elif row.signal == 'BEARISH' %}text-bearish{% endif %}">
-                            {{ row.signal }}
-                        </td>
-                        <td
-                            class="{% if row.signal2 == 'BULLISH' %}text-success{% elif row.signal2 == 'BEARISH' %}text-danger{% endif %}">
-                            {{ row.signal2 }}
-                        </td>
-                        <td>{{ row.volume }}</td>
-                        <td>{{ row['volume_change_%']|round(2) }}</td>
-                        <td>{{ row.close }}</td>
-                        <td>{{ row.open }}</td>
-                        <td>{{ row.high }}</td>
-                        <td>{{ row.low }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const autoRefreshToggle = document.getElementById("autoRefreshToggle");
-            const form = document.querySelector("form");
-            const instrumentInput = document.querySelector('input[list="instrumentList"]');
-            const livePriceSpan = document.getElementById('livePrice');
+    <form method="POST" class="row gx-2 gy-2 align-items-end flex-wrap text-white">
+      <div class="col-auto">
+        <label class="form-label">INSTRUMENT</label>
+        <input class="form-control form-control-sm" list="instrumentList" name="instrument" required
+          value="{{ symbol or '' }}">
+        <datalist id="instrumentList">
+          {% for name, token in instruments_options_map.items() %}
+          <option value="{{ name }}">{{ name }} ({{ token }})</option>
+          {% endfor %}
+        </datalist>
+        <span id="instrumentError" class="text-danger small mt-1"></span>
+      </div>
 
-            // New elements for Nifty 50 and BankNifty LTP
-            const nifty50LivePriceSpan = document.getElementById('nifty50LivePrice');
-            const bankNiftyLivePriceSpan = document.getElementById('bankNiftyLivePrice');
+      <div class="col-auto">
+        <label class="form-label">DATE</label>
+        <input type="date" name="date" class="form-control form-control-sm" required value="{{ date or '' }}">
+      </div>
 
-            let refreshTimer;
-            let livePriceTimer;
-            let indexPriceTimer; // New timer for index prices
+      <div class="col-auto">
+        <label class="form-label">INTERVAL</label>
+        <select name="interval" class="form-select form-select-sm">
+          <option value="1minute" {% if interval=='1minute' %}selected{% endif %}>1 Min</option>
+          <option value="3minute" {% if interval=='3minute' %}selected{% endif %}>3 Min</option>
+          <option value="5minute" {% if interval=='5minute' %}selected{% endif %}>5 Min</option>
+          <option value="10minute" {% if interval=='10minute' %}selected{% endif %}>10 Min</option>
+          <option value="15minute" {% if interval=='15minute' or interval is not defined %}selected{% endif %}>15 Min</option>
+          <option value="30minute" {% if interval=='30minute' %}selected{% endif %}>30 Min</option>
+          <option value="60minute" {% if interval=='60minute' %}selected{% endif %}>60 Min</option>
+        </select>
+      </div>
 
-            function startAutoRefresh() {
-                // Clear any existing timer to prevent multiple intervals running
-                stopAutoRefresh();
-                refreshTimer = setInterval(() => {
-                    if (form) {
-                        form.submit(); // Uses current session context, refreshes the whole page
-                    }
-                }, 10000); // 10 seconds for full page refresh
+      <div class="col-auto">
+        <label class="form-label">VOLUME BREAKOUT %</label>
+        <input type="number" step="0.1" name="volume_breakout" class="form-control form-control-sm" required
+          value="{{ volume_threshold or 100 }}">
+      </div>
+
+      <div class="col-auto d-flex align-items-end">
+        <button type="submit" class="btn btn-primary">SUBMIT </button>
+      </div>
+      <div class="col-auto">
+        <span id="livePrice" class="btn btn-primary" style="min-width:120px;display:inline-block;"></span>
+      </div>
+      <div class="col-auto">
+        <span id="nifty50LivePrice" class="btn btn-primary" style="min-width:120px;display:inline-block;"></span>
+      </div>
+      <div class="col-auto">
+        <span id="bankNiftyLivePrice" class="btn btn-primary" style="min-width:120px;display:inline-block;"></span>
+      </div>
+
+    </form>
+
+
+    {% if no_data %}
+    <div class="alert alert-warning mt-3" role="alert">
+      ⚠️ No data available for selected date/token.
+    </div>
+    {% endif %}
+
+    {% if data %}
+    <div class="table-container mt-4">
+      <table class="table table-dark table-striped table-bordered fixed-header">
+        <thead>
+          <tr>
+            <th>TIME</th>
+            <th class="momentum-col">VCP MNMX NG</th>
+            <th class="momentum-col">VCP MNMX</th>
+            <th>VOLUME</th>
+            <th>VOLUME CHANGE %</th>
+            <th>CLOSE</th>
+            <th>OPEN</th>
+            <th>HIGH</th>
+            <th>LOW</th>
+          </tr>
+        </thead>
+        <tbody id="liveTableBody">
+          {% for row in data %}
+          <tr
+            class="{% if row.signal == 'BULLISH' %}table-success{% elif row.signal == 'BEARISH' %}table-danger{% endif %}">
+            <td>{{ row.date[:16].split(' ')[1] }}</td>
+            <td
+              class="{% if row.signal == 'BULLISH' %}text-bullish{% elif row.signal == 'BEARISH' %}text-bearish{% endif %}">
+              {{ row.signal }}
+            </td>
+            <td
+              class="{% if row.signal2 == 'BULLISH' %}text-success{% elif row.signal2 == 'BEARISH' %}text-danger{% endif %}">
+              {{ row.signal2 }}
+            </td>
+            <td>{{ row.volume }}</td>
+            <td>{{ row['volume_change_%']|round(2) }}</td>
+            <td>{{ row.close }}</td>
+            <td>{{ row.open }}</td>
+            <td>{{ row.high }}</td>
+            <td>{{ row.low }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const autoRefreshToggle = document.getElementById("autoRefreshToggle");
+      const form = document.querySelector("form");
+      const instrumentInput = document.querySelector('input[list="instrumentList"]');
+      const livePriceSpan = document.getElementById('livePrice');
+      const instrumentErrorSpan = document.getElementById('instrumentError');
+      // New elements for Nifty 50 and BankNifty LTP
+      const nifty50LivePriceSpan = document.getElementById('nifty50LivePrice');
+      const bankNiftyLivePriceSpan = document.getElementById('bankNiftyLivePrice');
+
+      let refreshTimer;
+      let livePriceTimer;
+      let indexPriceTimer; // New timer for index prices
+
+      function startAutoRefresh() {
+        // Clear any existing timer to prevent multiple intervals running
+        stopAutoRefresh();
+        refreshTimer = setInterval(() => {
+          if (form) {
+            form.submit(); // Uses current session context, refreshes the whole page
+          }
+        }, 10000); // 10 seconds for full page refresh
+      }
+
+      function stopAutoRefresh() {
+        clearInterval(refreshTimer);
+      }
+
+      function toggleRefresh() {
+        if (autoRefreshToggle.checked) {
+          startAutoRefresh();
+        } else {
+          stopAutoRefresh();
+        }
+      }
+
+      // Initial check for auto-refresh on page load
+      if (autoRefreshToggle.checked) {
+        startAutoRefresh();
+      }
+
+      // Add event listener for the auto-refresh toggle
+      autoRefreshToggle.addEventListener('change', toggleRefresh);
+
+
+      // Live Price Fetcher for selected instrument
+      function fetchLivePrice(symbol) {
+        // Clear previous errors and live price display
+        instrumentErrorSpan.textContent = '';
+        livePriceSpan.textContent = '';
+
+        if (!symbol) {
+          return;
+        }
+
+        // If 'instrumentInput' is meant for 'get_nse_ltp', change the fetch URL accordingly:
+        // fetch(`/get_nse_ltp?symbol=${encodeURIComponent(symbol)}`)
+        fetch(`/get_option_ltp?symbol=${encodeURIComponent(symbol)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.ltp !== undefined) {
+              livePriceSpan.textContent = `Live Price: ₹${data.ltp}`;
+            } else if (data.error) {
+              // Display the error message received from the backend
+              instrumentErrorSpan.textContent = `Error: ${data.error}`;
+              livePriceSpan.textContent = 'N/A';
+            } else {
+              // Generic "no price" message if no LTP or specific error is found
+              livePriceSpan.textContent = 'No live price';
             }
+          })
+          .catch(error => {
+            console.error('Network or server error fetching live price:', error);
+            instrumentErrorSpan.textContent = 'Network error fetching instrument data.';
+            livePriceSpan.textContent = 'Error';
+          });
+      }
 
-            function stopAutoRefresh() {
-                clearInterval(refreshTimer);
+
+      function startLivePriceUpdates() {
+        if (livePriceTimer) clearInterval(livePriceTimer); // Clear previous timer
+        const symbol = instrumentInput.value;
+        fetchLivePrice(symbol); // Fetch immediately
+        livePriceTimer = setInterval(() => fetchLivePrice(instrumentInput.value), 5000); // Update every 1 second
+      }
+
+      // Start live price updates when the instrument input changes
+      instrumentInput.addEventListener('input', startLivePriceUpdates);
+
+      // Start live price updates on page load (for the initially loaded symbol)
+      startLivePriceUpdates();
+
+      // Function to fetch and display Nifty 50 and BankNifty LTP
+      function fetchIndexPrices() {
+        // Fetch Nifty 50 LTP
+        fetch('/get_index_ltp?index=NIFTY%2050')
+          .then(res => res.json())
+          .then(data => {
+            if (data.ltp !== undefined) {
+              nifty50LivePriceSpan.textContent = `Nifty 50: ₹${data.ltp}`;
+            } else {
+              nifty50LivePriceSpan.textContent = 'Nifty 50: N/A';
             }
+          })
+          .catch(error => {
+            console.error('Error fetching Nifty 50 LTP:', error);
+            nifty50LivePriceSpan.textContent = 'Nifty 50: Error';
+          });
 
-            function toggleRefresh() {
-                if (autoRefreshToggle.checked) {
-                    startAutoRefresh();
-                } else {
-                    stopAutoRefresh();
-                }
+        // Fetch BankNifty LTP
+        fetch('/get_index_ltp?index=BANKNIFTY')
+          .then(res => res.json())
+          .then(data => {
+            if (data.ltp !== undefined) {
+              bankNiftyLivePriceSpan.textContent = `BankNifty: ₹${data.ltp}`;
+            } else {
+              bankNiftyLivePriceSpan.textContent = 'BankNifty: N/A';
             }
+          })
+          .catch(error => {
+            console.error('Error fetching BankNifty LTP:', error);
+            bankNiftyLivePriceSpan.textContent = 'BankNifty: Error';
+          });
+      }
 
-            // Initial check for auto-refresh on page load
-            if (autoRefreshToggle.checked) {
-                startAutoRefresh();
-            }
-
-            // Add event listener for the auto-refresh toggle
-            autoRefreshToggle.addEventListener('change', toggleRefresh);
-
-
-            // Live Price Fetcher for selected instrument
-            function fetchLivePrice(symbol) {
-                if (!symbol) {
-                    livePriceSpan.textContent = '';
-                    return;
-                }
-                // Assuming /get_option_ltp exists and provides LTP for options/stocks
-                // If 'instrumentInput' is meant for 'get_nse_ltp', change the fetch URL accordingly:
-                // fetch(`/get_nse_ltp?symbol=${encodeURIComponent(symbol)}`)
-                fetch(`/get_option_ltp?symbol=${encodeURIComponent(symbol)}`) 
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.ltp !== undefined) {
-                            livePriceSpan.textContent = `Live Price: ₹${data.ltp}`;
-                        } else {
-                            livePriceSpan.textContent = 'No live price';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching live price for instrument:', error);
-                        livePriceSpan.textContent = 'Error fetching price';
-                    });
-            }
+      // Start fetching index prices immediately on load
+      fetchIndexPrices();
+      // Update index prices every 5 seconds (adjust as needed for less frequent updates)
+      indexPriceTimer = setInterval(fetchIndexPrices, 5000);
 
 
-            function startLivePriceUpdates() {
-                if (livePriceTimer) clearInterval(livePriceTimer); // Clear previous timer
-                const symbol = instrumentInput.value;
-                fetchLivePrice(symbol); // Fetch immediately
-                livePriceTimer = setInterval(() => fetchLivePrice(instrumentInput.value), 1000); // Update every 1 second
-            }
-
-            // Start live price updates when the instrument input changes
-            instrumentInput.addEventListener('input', startLivePriceUpdates);
-
-            // Start live price updates on page load (for the initially loaded symbol)
-            startLivePriceUpdates();
-
-            // Function to fetch and display Nifty 50 and BankNifty LTP
-            function fetchIndexPrices() {
-                // Fetch Nifty 50 LTP
-                fetch('/get_index_ltp?index=NIFTY%2050')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.ltp !== undefined) {
-                            nifty50LivePriceSpan.textContent = `Nifty 50: ₹${data.ltp}`;
-                        } else {
-                            nifty50LivePriceSpan.textContent = 'Nifty 50: N/A';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching Nifty 50 LTP:', error);
-                        nifty50LivePriceSpan.textContent = 'Nifty 50: Error';
-                    });
-
-                // Fetch BankNifty LTP
-                fetch('/get_index_ltp?index=BANKNIFTY')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.ltp !== undefined) {
-                            bankNiftyLivePriceSpan.textContent = `BankNifty: ₹${data.ltp}`;
-                        } else {
-                            bankNiftyLivePriceSpan.textContent = 'BankNifty: N/A';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching BankNifty LTP:', error);
-                        bankNiftyLivePriceSpan.textContent = 'BankNifty: Error';
-                    });
-            }
-
-            // Start fetching index prices immediately on load
-            fetchIndexPrices();
-            // Update index prices every 5 seconds (adjust as needed for less frequent updates)
-            indexPriceTimer = setInterval(fetchIndexPrices, 5000);
-
-
-            // Handle the "Oldest on Top" toggle (no specific JS logic provided in your original, but added for completeness if needed later)
-            const oldestTopToggle = document.getElementById("oldestTopToggle");
-            oldestTopToggle.addEventListener('change', function() {
-                // You would add logic here to re-sort your data or make an AJAX request
-                // to the server to get sorted data if you want this to be live.
-                // For a full page refresh, you might store this preference in a cookie or session
-                // and apply it server-side when rendering the table.
-                console.log("Oldest on Top toggled:", this.checked);
-            });
-        });
-    </script>
-    <div class="background-image"></div>
+      // Handle the "Oldest on Top" toggle (no specific JS logic provided in your original, but added for completeness if needed later)
+      const oldestTopToggle = document.getElementById("oldestTopToggle");
+      oldestTopToggle.addEventListener('change', function () {
+        // You would add logic here to re-sort your data or make an AJAX request
+        // to the server to get sorted data if you want this to be live.
+        // For a full page refresh, you might store this preference in a cookie or session
+        // and apply it server-side when rendering the table.
+        console.log("Oldest on Top toggled:", this.checked);
+      });
+    });
+  </script>
+  <div class="background-image"></div>
 </body>
 
 </html>
